@@ -18,38 +18,51 @@ import simulation.util.Vector2D;
 
 public class Simulator  implements Runnable {
 
-	
+
+	public static void main(String[] args) {
+
+		final Simulator simulator = Simulator.getInstance();
+
+		simulator.startGui();
+
+		new Thread(simulator).start();
+
+	}
+
+
 	public static final int TIME_STEP = 50;
 	public static final int MAX_X = 100;
 	public static final int MAX_Y = 100;
-	public static final int N_OF_AGENTS = 10;
+	public static final int N_OF_AGENTS = 4;
 	public static final double P_OF_REBEL = 0.1;
+
 	public static final double P_OF_MIXED = 0.2;
-	
+
 	private SwarmPanel panel;
-	
+
 	private static Agent[][] grid;
-	
 	private Calendar today = new GregorianCalendar(2011, Calendar.MARCH, 13);
 	private final Calendar LAST_DAY = new GregorianCalendar(2015, Calendar.MARCH, 24);
+
 	static final Random randomGenerator = new Random();
-	
+
 	private static final Simulator sim = new Simulator();
-	
+
+
 	private Agent[] agents = new Agent[N_OF_AGENTS];
-	
-	
+
 	private Simulator() {}
-	
+
 	private Set<Point> populateLocations() {
 		Set<Point> locations = new HashSet<Point>(N_OF_AGENTS);
+
 		for (int i = 0; i < N_OF_AGENTS; i++) {
 			while (!locations.add(getRandomPoint()));
 		}
 		return locations;
-		
+
 	}
-	
+
 	private Point getRandomPoint() {
 		int x = randomGenerator.nextInt(MAX_X);
 		int y = randomGenerator.nextInt(MAX_Y);
@@ -61,42 +74,59 @@ public class Simulator  implements Runnable {
 		if (grid == null) sim.init();
 		return sim;
 	}
-	
+
 	private void init() {
 		System.out.println("Initialising the simulation");
 		grid = new Agent[MAX_X][MAX_Y];
-		Set<Point> locations = populateLocations();
 		int i = 0;
-		for (Point point : locations) {
-			if (Math.random() < P_OF_REBEL) {
-				agents[i++] = grid[point.x][point.y] = new Agent(
-						AgentBehaviour.REBEL,
-						getRandomDirection(),
-						point.x,
-						point.y
-				);
-			} else if (Math.random() < P_OF_MIXED) {
-				agents[i++] = grid[point.x][point.y] = new Agent(
-						AgentBehaviour.MIXED,
-						getRandomDirection(),
-						point.x,
-						point.y
-				);
-			} else {
-				agents[i++] = grid[point.x][point.y] = new Agent(
-						getRandomDirection(),
-						point.x,
-						point.y
-				);
-			}
-			
-		}
+		Vector2D startPoint = new Vector2D(10,10);
+
+		//leader
+		// * -
+		// - -
+		agents[i++] = grid[startPoint.getX()][startPoint.getY()] = new Agent(
+				AgentBehaviour.NORMAL,
+				getRandomDirection(),// TODO get direction by keypress
+//                directionByKeyPress();
+				startPoint.getX(),
+				startPoint.getY()
+		);
+		//leaders row
+		// - *
+		// - -
+		agents[i++] = grid[startPoint.getX()+4][startPoint.getY()] = new Agent(
+				AgentBehaviour.NORMAL,
+				getRandomDirection(),// TODO get direction by keypress
+//                followFromLeft()
+				startPoint.getX()+4,
+				startPoint.getY()
+		);
+
+		//behind leader
+		// - -
+		// * -
+		agents[i++] = grid[startPoint.getX()][startPoint.getY() -4] = new Agent(
+				AgentBehaviour.NORMAL,
+				//followFromFront
+				getRandomDirection(),// TODO get direction by keypress
+				startPoint.getX(),
+				startPoint.getY() -4
+		);
+		// - -
+		// - *
+		agents[i++] = grid[startPoint.getX() + 4][startPoint.getY() -4] = new Agent(
+				AgentBehaviour.NORMAL,
+				//followFromFront
+				getRandomDirection(),// TODO get direction by keypress
+				startPoint.getX() + 4,
+				startPoint.getX() -4
+		);
 	}
 
 	private Direction getRandomDirection() {
 		return new Direction(Math.random());
 	}
-	
+
 	public List<Agent> getNeighbours(Agent requester, int distance) {
 		List<Agent> neighbours = new ArrayList<Agent>();
 		int maxHor = requester.getX() + distance;
@@ -109,20 +139,10 @@ public class Simulator  implements Runnable {
 		minVer = Math.max(minVer, 0);
 		for (int hor = minHor; hor <= maxHor; hor++) {
 			for (int ver = minVer; ver <= maxVer; ver++) {
-				if (grid[hor][ver] != null && grid[hor][ver] != requester) neighbours.add(grid[hor][ver]);	
+				if (grid[hor][ver] != null && grid[hor][ver] != requester) neighbours.add(grid[hor][ver]);
 			}
 		}
 		return neighbours;
-	}
-	
-	public static void main(String[] args) {
-	
-		final Simulator simulator = Simulator.getInstance();
-		
-		simulator.startGui();
-		
-		new Thread(simulator).start();
-		
 	}
 
 	private void startGui() {
@@ -136,13 +156,13 @@ public class Simulator  implements Runnable {
 	}
 
 	public void run() {
-		
+
 		printAgents();
-		
+
 		printGrid();
-		
+
 		Vector2D tmpPos = new Vector2D();
-				
+
 		while (today.before(LAST_DAY)) {
 			//System.out.println(today.getTime());
 			for (Agent agent : agents) {
@@ -161,13 +181,13 @@ public class Simulator  implements Runnable {
 				e.printStackTrace();
 			}
 		}
-		
+
 		panel.stop();
-		
+
 		System.out.println("END");
-		
+
 		printGrid();
-		
+
 	}
 
 	private void ensureAgentInValidPos(Vector2D oldPos, Agent agent) {
@@ -183,14 +203,14 @@ public class Simulator  implements Runnable {
 			agent.setPos(oldPos);
 		}
 	}
-	
+
 	private void checkLocalityPrinciple() {
 		Set<Vector2D> takenPos = new HashSet<Vector2D>();
 		for (Agent agent : agents) {
 			if (!takenPos.add(agent.getPos())) throw new RuntimeException("Position already taken: " + agent.getPos());
 		}
 	}
-	
+
 	public void message(String message) {
 		System.out.println(message);
 		panel.message(message);
@@ -213,5 +233,5 @@ public class Simulator  implements Runnable {
 			System.out.println(agent);
 		}
 	}
-	
+
 }
