@@ -8,14 +8,14 @@ import simulation.util.Vector2D;
 
 public class Agent {
 
-	public enum AgentBehaviour { NORMAL, REBEL, MIXED }
+	public enum AgentBehaviour { NORMAL, REBEL, MIXED, SWARM }
 
 	private class MixedAgentSettings {
 		static final double P_OF_GETTING_REBEL = 0.01;
 		static final int T_AS_REBEL = 500;
 		int timeAsRebel = 0;
 	}
-	
+
 	private static final int INERTIA = 3;
 	private static final int REACH = 20;
 	private static final int AGENT_SIZE = SwarmPanel.SCALE;
@@ -24,7 +24,7 @@ public class Agent {
 	private Direction direction;
 	private AgentBehaviour behaviour = AgentBehaviour.NORMAL;
 	private MixedAgentSettings mixedAgentSettings = new MixedAgentSettings();
-	
+
 	private AgentDailyCycle normalCycle = new NormalAgentDailyCycle();
 	private AgentDailyCycle rebelCycle = new RebelAgentDailyCycle();
 
@@ -42,30 +42,34 @@ public class Agent {
 		this.y = y;
 		this.direction = direction;
 	}
-	
+
 	public AgentBehaviour getAgentBehaviour() {
 		return behaviour;
 	}
 
 	public void dailyCycle() {
 		switch(behaviour) {
-		case MIXED:
-			if (mixedAgentSettings.timeAsRebel > 0) {
-				rebelCycle.dailyCycle();
-				mixedAgentSettings.timeAsRebel++;
-				if (mixedAgentSettings.timeAsRebel > MixedAgentSettings.T_AS_REBEL) {
-					mixedAgentSettings.timeAsRebel = 0;
+			case MIXED:
+				if (mixedAgentSettings.timeAsRebel > 0) {
+					rebelCycle.dailyCycle();
+					mixedAgentSettings.timeAsRebel++;
+					if (mixedAgentSettings.timeAsRebel > MixedAgentSettings.T_AS_REBEL) {
+						mixedAgentSettings.timeAsRebel = 0;
+					}
+				} else if (Math.random() < MixedAgentSettings.P_OF_GETTING_REBEL) {
+					sim.message("Agent turning rebel");
+					rebelCycle.dailyCycle();
+					mixedAgentSettings.timeAsRebel = 1;
+				} else {
+					normalCycle.dailyCycle();
 				}
-			} else if (Math.random() < MixedAgentSettings.P_OF_GETTING_REBEL) {
-				sim.message("Agent turning rebel");
-				rebelCycle.dailyCycle();
-				mixedAgentSettings.timeAsRebel = 1;
-			} else {
-				normalCycle.dailyCycle();
-			}
-			break;
-		case NORMAL: normalCycle.dailyCycle(); break;
-		case REBEL: rebelCycle.dailyCycle(); break;
+				break;
+			case NORMAL: normalCycle.dailyCycle(); break;
+			case REBEL: rebelCycle.dailyCycle(); break;
+//		case SWARM_LEADER: swarmCycle.dailyCycle(); break; //move by key press
+//      case SWARM_LEFT: swarmCycle.dailyCycle(); break;
+//		casw SWARM_FRONT: swarmCycle.dailyCycle(); break;
+
 		}
 	}
 
@@ -147,7 +151,7 @@ public class Agent {
 	public String toString() {
 		return "X=" + x + " Y=" + y + " D=" + direction;
 	}
-	
+
 	private Agent getAgent() {
 		return this;
 	}
