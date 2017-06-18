@@ -52,7 +52,7 @@ public class Agent {
 	}
 
 	public void dailyCycle() {
-		leaderCycle.dailyCycle();
+//		leaderCycle.dailyCycle();
 		switch(behaviour) {
 			case MIXED:
 //				if (mixedAgentSettings.timeAsRebel > 0) {
@@ -69,7 +69,7 @@ public class Agent {
 //					normalCycle.dailyCycle();
 //				}
 //				break;
-			case NORMAL: leaderCycle.dailyCycle(); break;
+			case NORMAL: normalCycle.dailyCycle(); break;
 //			case REBEL: rebelCycle.dailyCycle(); break;
 //			case SWARM_LEADER: leaderCycle.dailyCycle(); break; //move by key press
 //			case FOLLOW_LEFT: swarmCycle.dailyCycle(); break;

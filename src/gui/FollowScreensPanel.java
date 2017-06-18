@@ -47,13 +47,12 @@ public class FollowScreensPanel extends JPanel {
         LastPanel.setBackground(Color.black);
         LastPanel.paintPixel(150, 100 , 150, 200);
 
-
-
-        JLabel direction = new JLabel();
-        direction.setLocation((int)leaderLocation.getWidth(),(int)leaderLocation.getHeight());
-        direction.setSize(500, 50);
-        direction.setText("SWARM simulation");
-        LastPanel.add(direction);
+//
+//        JLabel direction = new JLabel();
+//        direction.setLocation((int)leaderLocation.getWidth() + 20,(int)leaderLocation.getHeight() + 20);
+//        direction.setSize(500, 50);
+//        direction.setText("SWARM simulation");
+//        LastPanel.add(direction);
 
 
 

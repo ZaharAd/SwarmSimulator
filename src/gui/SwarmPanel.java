@@ -23,12 +23,14 @@ public class SwarmPanel extends JPanel implements KeyListener {
 
 	private AgentComponent[] components;
 	private FollowScreensPanel screens = new FollowScreensPanel();
-
 	private boolean running = false;
 
 	public static final int SCALE = 7;
 
 	private JLabel messageLabel = new JLabel();
+	private JPanel leader;
+	private JLabel leaderDirection;;
+	private int angle;
 
 	public void stop() {
 		running = false;
@@ -72,6 +74,13 @@ public class SwarmPanel extends JPanel implements KeyListener {
 			add(components[i]);
 		}
 
+		leader = screens.getLeaderPanel();
+		leaderDirection = new JLabel();;
+		Dimension screenLocation = screens.getLeaderLocation();
+		leaderDirection.setLocation((int)screenLocation.getWidth()+300,(int)screenLocation.getHeight()+450);
+		leaderDirection.setSize(100, 50);
+		angle = 0;
+
 
 		startThread();
 
@@ -111,56 +120,58 @@ public class SwarmPanel extends JPanel implements KeyListener {
 
     @Override
     public void keyPressed(KeyEvent e) {
-	    JPanel leader = screens.getLeaderPanel();
-        JLabel direction = new JLabel();
-        Dimension screenLocation = screens.getLeaderLocation();
-
-        direction.setLocation((int)screenLocation.getWidth() + 70,(int)screenLocation.getHeight() + 70);
-        direction.setSize(500, 50);
-        direction.setText("SWARM simulation");
-        leader.add(direction);
-//        screens.setLeaderPanel(leader);
-
-        if (e.getKeyCode() == KeyEvent.VK_D) {
-            System.out.println("Clockwise key pressed");
-        }
-        if (e.getKeyCode() == KeyEvent.VK_A) {
-            System.out.println("CounterClockwise key pressed");
-        }
-        if (e.getKeyCode() == KeyEvent.VK_W) {
-            System.out.println("Up key pressed");
-        }
-        if (e.getKeyCode() == KeyEvent.VK_S) {
-            System.out.println("Down key pressed");
+        if (e.getKeyCode() == KeyEvent.VK_UP) {
+            leaderDirection.setText("\nFront key pressed");
         }
         if (e.getKeyCode() == KeyEvent.VK_RIGHT) {
-            System.out.println("Right key pressed");
+            leaderDirection.setText("\nRight key pressed");
         }
         if (e.getKeyCode() == KeyEvent.VK_LEFT) {
-            System.out.println("Left key pressed");
-        }
-        if (e.getKeyCode() == KeyEvent.VK_UP) {
-            System.out.println("Front key pressed");
+            leaderDirection.setText("\nLeft key pressed");
         }
         if (e.getKeyCode() == KeyEvent.VK_DOWN) {
-            System.out.println("Stop key pressed");
+            leaderDirection.setText("\nStop key pressed");
         }
-    }
+        if (e.getKeyCode() == KeyEvent.VK_D) {
+			angle ++;
+        	leaderDirection.setText("\nClockwise");
+        }
+        if (e.getKeyCode() == KeyEvent.VK_A) {
+        	angle++;
+			leaderDirection.setText("\nCounterClockwise");
+        }
+        if (e.getKeyCode() == KeyEvent.VK_W) {
+			leaderDirection.setText("\nUp key pressed");
+        }
+        if (e.getKeyCode() == KeyEvent.VK_S) {
+            leaderDirection.setText("\nDown key pressed");
+        }
+
+		leader.add(leaderDirection);
+	}
 
     @Override
     public void keyReleased(KeyEvent e) {
-        if (e.getKeyCode() == KeyEvent.VK_D) {
-            System.out.println("Clockwise key Released");
-        }
-        if (e.getKeyCode() == KeyEvent.VK_A) {
-            System.out.println("CounterClockwise key Released");
-        }
+		if (e.getKeyCode() == KeyEvent.VK_D) {
+			leaderDirection.setText("\n"+ angle + " degrees");
+		}
+		if (e.getKeyCode() == KeyEvent.VK_A) {
+			leaderDirection.setText("\n"+ angle + " degrees");
+		}
         if (e.getKeyCode() == KeyEvent.VK_W) {
             System.out.println("Up key Released");
         }
         if (e.getKeyCode() == KeyEvent.VK_S) {
             System.out.println("Down key Released");
         }
+        new Timer().schedule(new TimerTask() {
+            @Override
+            public void run() {
+                leaderDirection.setText("");
+            }
+        }, 5000);
+
+        angle = 0;
     }
 
 //	@Override
