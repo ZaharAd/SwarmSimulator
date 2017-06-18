@@ -27,6 +27,7 @@ public class Agent {
 	private AgentBehaviour behaviour = AgentBehaviour.NORMAL;
 	private MixedAgentSettings mixedAgentSettings = new MixedAgentSettings();
 
+
 	private AgentDailyCycle normalCycle = new NormalAgentDailyCycle();
 	private AgentDailyCycle rebelCycle = new RebelAgentDailyCycle();
 
