@@ -2,13 +2,15 @@ package simulation;
 
 import gui.SwarmPanel;
 
+import java.awt.event.KeyEvent;
+import java.awt.event.KeyListener;
 import java.util.List;
 
 import simulation.util.Vector2D;
 
 public class Agent {
 
-	public enum AgentBehaviour { NORMAL, REBEL, MIXED, SWARM }
+	public enum AgentBehaviour { NORMAL, REBEL, MIXED, SWARM_LEADER , FOLLOW_LEFT, FOLLOW_FRONT }
 
 	private class MixedAgentSettings {
 		static final double P_OF_GETTING_REBEL = 0.01;
@@ -27,6 +29,8 @@ public class Agent {
 
 	private AgentDailyCycle normalCycle = new NormalAgentDailyCycle();
 	private AgentDailyCycle rebelCycle = new RebelAgentDailyCycle();
+
+	private AgentDailyCycle leaderCycle = new ByPressCycle();
 
 	private static Simulator sim = Simulator.getInstance();
 
@@ -48,27 +52,28 @@ public class Agent {
 	}
 
 	public void dailyCycle() {
+		leaderCycle.dailyCycle();
 		switch(behaviour) {
 			case MIXED:
-				if (mixedAgentSettings.timeAsRebel > 0) {
-					rebelCycle.dailyCycle();
-					mixedAgentSettings.timeAsRebel++;
-					if (mixedAgentSettings.timeAsRebel > MixedAgentSettings.T_AS_REBEL) {
-						mixedAgentSettings.timeAsRebel = 0;
-					}
-				} else if (Math.random() < MixedAgentSettings.P_OF_GETTING_REBEL) {
-					sim.message("Agent turning rebel");
-					rebelCycle.dailyCycle();
-					mixedAgentSettings.timeAsRebel = 1;
-				} else {
-					normalCycle.dailyCycle();
-				}
-				break;
-			case NORMAL: normalCycle.dailyCycle(); break;
-			case REBEL: rebelCycle.dailyCycle(); break;
-//		case SWARM_LEADER: swarmCycle.dailyCycle(); break; //move by key press
-//      case SWARM_LEFT: swarmCycle.dailyCycle(); break;
-//		casw SWARM_FRONT: swarmCycle.dailyCycle(); break;
+//				if (mixedAgentSettings.timeAsRebel > 0) {
+//					rebelCycle.dailyCycle();
+//					mixedAgentSettings.timeAsRebel++;
+//					if (mixedAgentSettings.timeAsRebel > MixedAgentSettings.T_AS_REBEL) {
+//						mixedAgentSettings.timeAsRebel = 0;
+//					}
+//				} else if (Math.random() < MixedAgentSettings.P_OF_GETTING_REBEL) {
+//					sim.message("Agent turning rebel");
+//					rebelCycle.dailyCycle();
+//					mixedAgentSettings.timeAsRebel = 1;
+//				} else {
+//					normalCycle.dailyCycle();
+//				}
+//				break;
+			case NORMAL: leaderCycle.dailyCycle(); break;
+//			case REBEL: rebelCycle.dailyCycle(); break;
+//			case SWARM_LEADER: leaderCycle.dailyCycle(); break; //move by key press
+//			case FOLLOW_LEFT: swarmCycle.dailyCycle(); break;
+//			case FOLLOW_FRONT: swarmCycle.dailyCycle(); break;
 
 		}
 	}
@@ -156,8 +161,18 @@ public class Agent {
 		return this;
 	}
 
+
 	private interface AgentDailyCycle {
 		void dailyCycle();
+	}
+
+	public class ByPressCycle implements AgentDailyCycle {
+
+		@Override
+		public void dailyCycle() {
+			goAhead();
+		}
+
 	}
 
 	private class NormalAgentDailyCycle implements AgentDailyCycle {

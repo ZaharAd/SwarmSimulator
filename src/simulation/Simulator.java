@@ -53,7 +53,7 @@ public class Simulator  implements Runnable {
 
 	private Simulator() {}
 
-	private Set<Point> populateLocations() {
+	/*private Set<Point> populateLocations() {
 		Set<Point> locations = new HashSet<Point>(N_OF_AGENTS);
 
 		for (int i = 0; i < N_OF_AGENTS; i++) {
@@ -61,14 +61,14 @@ public class Simulator  implements Runnable {
 		}
 		return locations;
 
-	}
+	}*/
 
-	private Point getRandomPoint() {
+	/*private Point getRandomPoint() {
 		int x = randomGenerator.nextInt(MAX_X);
 		int y = randomGenerator.nextInt(MAX_Y);
 		return new Point(x,y);
 //		return new Point(MAX_X/2, MAX_Y/2);
-	}
+	}*/
 
 	public static Simulator getInstance() {
 		if (grid == null) sim.init();
@@ -159,7 +159,7 @@ public class Simulator  implements Runnable {
 
 		printAgents();
 
-		printGrid();
+//		printGrid();
 
 		Vector2D tmpPos = new Vector2D();
 
