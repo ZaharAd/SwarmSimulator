@@ -15,7 +15,6 @@ import simulation.Simulator;
 
 public class SwarmPanel extends JPanel implements KeyListener {
 
-
 	/**
 	 *
 	 */
@@ -28,9 +27,12 @@ public class SwarmPanel extends JPanel implements KeyListener {
 	public static final int SCALE = 7;
 
 	private JLabel messageLabel = new JLabel();
-	private JPanel leader;
+	private JPanel leaderPanel;
 	private JLabel leaderDirection;;
-	private int angle;
+	private int angle ;
+	private double hight;
+	private boolean isTurn = false;
+
 
 	public void stop() {
 		running = false;
@@ -43,7 +45,6 @@ public class SwarmPanel extends JPanel implements KeyListener {
 	}
 
 	public void init(Agent[] agents) {
-
 
 		final Dimension sizeWithScreesns = new Dimension(Simulator.MAX_X*SCALE + 600 , Simulator.MAX_Y*SCALE );
 
@@ -60,8 +61,8 @@ public class SwarmPanel extends JPanel implements KeyListener {
 		final JFrame frame = new JFrame();
 		frame.add(screens);
 		frame.add(this);
-        frame.addKeyListener(this);
-        frame.setSize(sizeWithScreesns);
+		frame.addKeyListener(this);
+		frame.setSize(sizeWithScreesns);
 		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		frame.setVisible(true);
 		this.setOpaque(true);
@@ -74,12 +75,13 @@ public class SwarmPanel extends JPanel implements KeyListener {
 			add(components[i]);
 		}
 
-		leader = screens.getLeaderPanel();
+		leaderPanel = screens.getLeaderPanel();
 		leaderDirection = new JLabel();;
 		Dimension screenLocation = screens.getLeaderLocation();
 		leaderDirection.setLocation((int)screenLocation.getWidth()+300,(int)screenLocation.getHeight()+450);
 		leaderDirection.setSize(100, 50);
 		angle = 0;
+		hight = 0;
 
 
 		startThread();
@@ -113,66 +115,108 @@ public class SwarmPanel extends JPanel implements KeyListener {
 		}, 2000);
 	}
 
-    @Override
-    public void keyTyped(KeyEvent e) {
-
-    }
-
-    @Override
-    public void keyPressed(KeyEvent e) {
-        if (e.getKeyCode() == KeyEvent.VK_UP) {
-            leaderDirection.setText("\nFront key pressed");
-        }
-        if (e.getKeyCode() == KeyEvent.VK_RIGHT) {
-            leaderDirection.setText("\nRight key pressed");
-        }
-        if (e.getKeyCode() == KeyEvent.VK_LEFT) {
-            leaderDirection.setText("\nLeft key pressed");
-        }
-        if (e.getKeyCode() == KeyEvent.VK_DOWN) {
-            leaderDirection.setText("\nStop key pressed");
-        }
-        if (e.getKeyCode() == KeyEvent.VK_D) {
-			angle ++;
-        	leaderDirection.setText("\nClockwise");
-        }
-        if (e.getKeyCode() == KeyEvent.VK_A) {
-        	angle++;
-			leaderDirection.setText("\nCounterClockwise");
-        }
-        if (e.getKeyCode() == KeyEvent.VK_W) {
-			leaderDirection.setText("\nUp key pressed");
-        }
-        if (e.getKeyCode() == KeyEvent.VK_S) {
-            leaderDirection.setText("\nDown key pressed");
-        }
-
-		leader.add(leaderDirection);
+	public FollowScreensPanel getScreens() {
+		return screens;
 	}
 
-    @Override
-    public void keyReleased(KeyEvent e) {
-		if (e.getKeyCode() == KeyEvent.VK_D) {
-			leaderDirection.setText("\n"+ angle + " degrees");
+	public void setScreens(FollowScreensPanel screens) {
+		this.screens = screens;
+	}
+
+	public void updateScreens(String command) {
+		System.out.println(command);
+		if(command.equals("goAhed")){
+			screens.getSecondPanel().paintPixel(
+					screens.getSecondPanel().getX_1() + 20 , screens.getSecondPanel().getY_1(),
+					screens.getSecondPanel().getX_2() + 20 , screens.getSecondPanel().getY_2());
+		}else if(command.equals("goRight")){
+		}else if(command.equals("goLeft")){
+		}
+	}
+
+	@Override
+	public void keyTyped(KeyEvent e) {
+
+	}
+
+	@Override
+	public void keyPressed(KeyEvent e) {
+		Agent leaderAgent = components[0].getAgent();
+
+		if (e.getKeyCode() == KeyEvent.VK_UP) {
+//			if(isTurn){
+//				isTurn = false;
+//				leaderDirection.setText("\n"+ angle + " degrees");/// TODO not shown
+//				angle = 0;
+//			}
+			leaderAgent.setCommand("goAhed");
+			leaderDirection.setText("\nFront key pressed");
+		}
+		if (e.getKeyCode() == KeyEvent.VK_DOWN) {
+			leaderAgent.setCommand("stop");
+			leaderDirection.setText("\nStop key pressed");
+		}
+		if (e.getKeyCode() == KeyEvent.VK_RIGHT) {
+			leaderAgent.setCommand("goRight");
+			leaderDirection.setText("\nRight key pressed");
+		}
+		if (e.getKeyCode() == KeyEvent.VK_LEFT) {
+			leaderAgent.setCommand("goLeft");
+			leaderDirection.setText("\nLeft key pressed");
+		}
+		if (e.getKeyCode() == KeyEvent.VK_D) {;
+			isTurn = true;
+			angle ++;
+			leaderAgent.getDirection().turn(1);
+			leaderDirection.setText("\nClockwise");
 		}
 		if (e.getKeyCode() == KeyEvent.VK_A) {
-			leaderDirection.setText("\n"+ angle + " degrees");
+			isTurn = true;
+			angle++;
+			leaderAgent.getDirection().turn(-1);
+			leaderDirection.setText("\nCounterClockwise");
 		}
-        if (e.getKeyCode() == KeyEvent.VK_W) {
-            System.out.println("Up key Released");
-        }
-        if (e.getKeyCode() == KeyEvent.VK_S) {
-            System.out.println("Down key Released");
-        }
-        new Timer().schedule(new TimerTask() {
-            @Override
-            public void run() {
-                leaderDirection.setText("");
-            }
-        }, 5000);
+		if (e.getKeyCode() == KeyEvent.VK_W) {
+			hight+= 0.25;
+			leaderDirection.setText("\nUp key pressed");
+		}
+		if (e.getKeyCode() == KeyEvent.VK_S) {
+			hight+= 0.25;
+			leaderDirection.setText("\nDown key pressed");
+		}
 
-        angle = 0;
-    }
+		leaderPanel.add(leaderDirection);
+	}
+
+	@Override
+	public void keyReleased(KeyEvent e) {
+		Agent leader = components[0].getAgent();
+		if (e.getKeyCode() == KeyEvent.VK_D) {
+//			leader.getDirection().turn(angle);
+//			leaderDirection.setText("\n"+ angle + " degrees");
+		}
+		if (e.getKeyCode() == KeyEvent.VK_A) {
+//			leader.getDirection().turn(-angle);
+//			leaderDirection.setText("\n"+ angle + " degrees");
+		}
+		if (e.getKeyCode() == KeyEvent.VK_W) {
+			leaderDirection.setText("\n" + hight + " meters");
+		}
+		if (e.getKeyCode() == KeyEvent.VK_S) {
+			leaderDirection.setText("\n" + hight + " meters");
+		}
+		new Timer().schedule(new TimerTask() {
+			@Override
+			public void run() {
+				leaderDirection.setText("");
+			}
+		}, 5000);
+
+//		angle = 0;
+		hight = 0;
+	}
+
+
 
 //	@Override
 //	protected void paintComponent(Graphics g) {

@@ -42,11 +42,13 @@ public class FollowScreensPanel extends JPanel {
         LeaderPanel.setBackground(Color.yellow);
         SecondPanel.setBackground(Color.black);
         SecondPanel.paintPixel(150, 100 , 150, 200);
+        SecondPanel.setCameraSide("left");
         BehindLeaderPanel.setBackground(Color.black);
         BehindLeaderPanel.paintPixel(150, 100 , 150, 200);
+        BehindLeaderPanel.setCameraSide("front");
         LastPanel.setBackground(Color.black);
         LastPanel.paintPixel(150, 100 , 150, 200);
-
+        LastPanel.setCameraSide("front");
 //
 //        JLabel direction = new JLabel();
 //        direction.setLocation((int)leaderLocation.getWidth() + 20,(int)leaderLocation.getHeight() + 20);

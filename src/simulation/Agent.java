@@ -26,12 +26,16 @@ public class Agent {
 	private Direction direction;
 	private AgentBehaviour behaviour = AgentBehaviour.NORMAL;
 	private MixedAgentSettings mixedAgentSettings = new MixedAgentSettings();
-
+	private String command ="";
 
 	private AgentDailyCycle normalCycle = new NormalAgentDailyCycle();
 	private AgentDailyCycle rebelCycle = new RebelAgentDailyCycle();
 
-	private AgentDailyCycle leaderCycle = new ByPressCycle();
+	public AgentDailyCycle leaderCycle = new ByPressCycle();
+
+	public AgentDailyCycle getLeaderCycle() {
+		return leaderCycle;
+	}
 
 	private static Simulator sim = Simulator.getInstance();
 
@@ -53,9 +57,9 @@ public class Agent {
 	}
 
 	public void dailyCycle() {
-//		leaderCycle.dailyCycle();
 		switch(behaviour) {
-			case MIXED:
+			case SWARM_LEADER:leaderCycle.dailyCycle(); break;
+//			case MIXED:
 //				if (mixedAgentSettings.timeAsRebel > 0) {
 //					rebelCycle.dailyCycle();
 //					mixedAgentSettings.timeAsRebel++;
@@ -70,7 +74,7 @@ public class Agent {
 //					normalCycle.dailyCycle();
 //				}
 //				break;
-			case NORMAL: normalCycle.dailyCycle(); break;
+//			case NORMAL: normalCycle.dailyCycle(); break;
 //			case REBEL: rebelCycle.dailyCycle(); break;
 //			case SWARM_LEADER: leaderCycle.dailyCycle(); break; //move by key press
 //			case FOLLOW_LEFT: swarmCycle.dailyCycle(); break;
@@ -79,13 +83,28 @@ public class Agent {
 		}
 	}
 
-	private void goAhead() {
+
+	public void goAhead() {
 		double angle = Math.toRadians(direction.getAngle());
 		double xDiff = Math.sin(angle);
 		double yDiff = Math.cos(angle);
 		x += xDiff;
 		y -= yDiff;
 	}
+
+	public void goToSide(String side) {
+		double angle;
+		if(side.equals("left")){
+			angle = Math.toRadians(direction.getAngle() - 90);
+		}else {
+			angle = Math.toRadians(direction.getAngle() + 90);
+		}
+		double xDiff = Math.sin(angle);
+		double yDiff = Math.cos(angle);
+		x += xDiff;
+		y -= yDiff;
+	}
+
 
 	private void steerTowards(Vector2D position, double willingness) {
 		if (position.x > x) {
@@ -154,6 +173,10 @@ public class Agent {
 		return direction.getAngle();
 	}
 
+	public Direction getDirection() {
+		return direction;
+	}
+
 	public String toString() {
 		return "X=" + x + " Y=" + y + " D=" + direction;
 	}
@@ -162,6 +185,13 @@ public class Agent {
 		return this;
 	}
 
+	public String getCommand() {
+		return command;
+	}
+
+	public void setCommand(String command) {
+		this.command = command;
+	}
 
 	private interface AgentDailyCycle {
 		void dailyCycle();
@@ -171,10 +201,17 @@ public class Agent {
 
 		@Override
 		public void dailyCycle() {
-			goAhead();
+			if(command.equals("goAhed")){
+				goAhead();
+			}else if(command.equals("goRight")){
+				goToSide("right");
+			}else if(command.equals("goLeft")){
+				goToSide("left");
+			}
 		}
 
 	}
+
 
 	private class NormalAgentDailyCycle implements AgentDailyCycle {
 

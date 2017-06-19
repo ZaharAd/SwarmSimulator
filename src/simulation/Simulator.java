@@ -85,7 +85,7 @@ public class Simulator  implements Runnable {
 		// * -
 		// - -
 		agents[i++] = grid[startPoint.getX()][startPoint.getY()] = new Agent(
-				AgentBehaviour.NORMAL,
+				AgentBehaviour.SWARM_LEADER,
 				getRandomDirection(),// TODO get direction by keypress
 //                directionByKeyPress();
 				startPoint.getX(),
@@ -164,11 +164,15 @@ public class Simulator  implements Runnable {
 		Vector2D tmpPos = new Vector2D();
 
 		while (today.before(LAST_DAY)) {
-			//System.out.println(today.getTime());
 			for (Agent agent : agents) {
 				tmpPos.x = agent.x;
 				tmpPos.y = agent.y;
 				agent.dailyCycle();
+				if(agent.getAgentBehaviour().equals(AgentBehaviour.SWARM_LEADER) && !agent.getCommand().equals("")){
+					panel.updateScreens(agent.getCommand());
+				}else{
+
+				}
 				if (!agent.getPos().equals(tmpPos)) ensureAgentInValidPos(tmpPos, agent);
 			}
 			checkLocalityPrinciple();
@@ -189,6 +193,11 @@ public class Simulator  implements Runnable {
 		printGrid();
 
 	}
+
+	private void updateScreens(String command) {
+
+	}
+
 
 	private void ensureAgentInValidPos(Vector2D oldPos, Agent agent) {
 		if (agent.getX() < 0) agent.x = MAX_X + agent.getX();

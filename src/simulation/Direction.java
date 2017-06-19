@@ -29,7 +29,11 @@ public class Direction {
 	public int getAngle() {
 		return angle;
 	}
-	
+
+	public void setAngle(int angle) {
+		this.angle = angle;
+	}
+
 	private int sanitizeAngle(int angle) {
 		return angle < 0 ? 360 + angle%360 : angle%360;
 	}
