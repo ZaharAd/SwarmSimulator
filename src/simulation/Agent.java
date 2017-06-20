@@ -1,14 +1,14 @@
 package simulation;
 
+import gui.AgentPaintedPanel;
 import gui.SwarmPanel;
 
-import java.awt.event.KeyEvent;
-import java.awt.event.KeyListener;
 import java.util.List;
 
 import simulation.util.Vector2D;
 
 public class Agent {
+
 
 	public enum AgentBehaviour { NORMAL, REBEL, MIXED, SWARM_LEADER , FOLLOW_LEFT, FOLLOW_FRONT }
 
@@ -28,10 +28,8 @@ public class Agent {
 	private MixedAgentSettings mixedAgentSettings = new MixedAgentSettings();
 	private String command ="";
 
-	private AgentDailyCycle normalCycle = new NormalAgentDailyCycle();
-	private AgentDailyCycle rebelCycle = new RebelAgentDailyCycle();
-
 	public AgentDailyCycle leaderCycle = new ByPressCycle();
+	public AgentDailyCycle leftMemberCycle = new followFromLeftCycle();
 
 	public AgentDailyCycle getLeaderCycle() {
 		return leaderCycle;
@@ -59,6 +57,7 @@ public class Agent {
 	public void dailyCycle() {
 		switch(behaviour) {
 			case SWARM_LEADER:leaderCycle.dailyCycle(); break;
+			case FOLLOW_LEFT:leftMemberCycle.dailyCycle(); break;
 //			case MIXED:
 //				if (mixedAgentSettings.timeAsRebel > 0) {
 //					rebelCycle.dailyCycle();
@@ -212,6 +211,44 @@ public class Agent {
 
 	}
 
+	public class followFromLeftCycle implements AgentDailyCycle {
+
+		@Override
+		public void dailyCycle() {
+			AgentPaintedPanel[] memberPanels = sim.getPanel().getAgentPanelsArr();
+			for (int i = 0; i < memberPanels.length; i++) {
+				if(memberPanels[i].getIRdim() == memberPanels[i].getLastIRdim() + 2){
+					setCommand("goLeft");
+					goToSide("left");
+					memberPanels[i].setIRdim(memberPanels[i].getLastIRdim());
+				}
+
+				if(memberPanels[i].getIRdim() == memberPanels[i].getLastIRdim() - 2){
+					setCommand("goRight");
+					goToSide("right");
+					memberPanels[i].setIRdim(memberPanels[i].getLastIRdim());
+				}
+
+				if (memberPanels[i].getX_1() == memberPanels[i].getLastLocation()[0]
+						&& memberPanels[i].getX_2() == memberPanels[i].getLastLocation()[2]){
+					setCommand("stop");
+				}
+
+				if (memberPanels[i].getX_1() == memberPanels[i].getLastLocation()[0] + 15
+						&& memberPanels[i].getX_2() == memberPanels[i].getLastLocation()[2] + 15) {
+					setCommand("goAhed");
+					goAhead();
+				}
+
+				if (memberPanels[i].getX_1() == memberPanels[i].getLastLocation()[0] - 15
+						&& memberPanels[i].getX_2() == memberPanels[i].getLastLocation()[2] - 15) {
+					setCommand("goBack");
+				}
+
+				setCommand("stop");
+			}
+		}
+	}
 
 	private class NormalAgentDailyCycle implements AgentDailyCycle {
 

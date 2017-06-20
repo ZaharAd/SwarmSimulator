@@ -22,6 +22,7 @@ class AgentComponent extends JComponent {
 	private int shapeWidth = 10;
 	private Color agentColor;
 	private AgentBehaviour currentBehaviour;
+	private int[] lastLocation;
 
 	AgentComponent(Agent agent) {
 		this.agent = agent;
@@ -84,4 +85,7 @@ class AgentComponent extends JComponent {
 		g2.fill(shape);
 	}
 
+	public void setLastLocation(int[] lastLocation) {
+		this.lastLocation = lastLocation;
+	}
 }

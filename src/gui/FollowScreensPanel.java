@@ -17,7 +17,12 @@ public class FollowScreensPanel extends JPanel {
     private AgentPaintedPanel BehindLeaderPanel;
     private AgentPaintedPanel LastPanel;
 
+    private AgentPaintedPanel[] members;
     private Dimension leaderLocation;//, secondLocation, behindeLocation, lastLocation;
+
+    public FollowScreensPanel() {
+        init();
+    }
 
     private void init() {
         leaderLocation = new Dimension(Simulator.MAX_X*SCALE +10, 0);
@@ -36,6 +41,7 @@ public class FollowScreensPanel extends JPanel {
         BehindLeaderPanel = new AgentPaintedPanel();
         LastPanel = new AgentPaintedPanel();
 
+        members =new AgentPaintedPanel[] {SecondPanel, BehindLeaderPanel, LastPanel};
 //        Dimension dimIR1 = new Dimension(150,100);
 //        Dimension dimIR2 = new Dimension(150,200);
 
@@ -73,6 +79,10 @@ public class FollowScreensPanel extends JPanel {
 
     }
 
+    public AgentPaintedPanel[] getAgentPanelsArr (){
+        return members;
+    }
+
     public Dimension getLeaderLocation() {
         return leaderLocation;
     }
@@ -81,9 +91,6 @@ public class FollowScreensPanel extends JPanel {
         this.leaderLocation = leaderLocation;
     }
 
-    public FollowScreensPanel() {
-        init();
-    }
 
     public JPanel getLeaderPanel() {
         return LeaderPanel;

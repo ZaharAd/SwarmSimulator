@@ -1,8 +1,8 @@
 package simulation;
 
+import gui.FollowScreensPanel;
 import gui.SwarmPanel;
 
-import java.awt.Point;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.GregorianCalendar;
@@ -86,7 +86,8 @@ public class Simulator  implements Runnable {
 		// - -
 		agents[i++] = grid[startPoint.getX()][startPoint.getY()] = new Agent(
 				AgentBehaviour.SWARM_LEADER,
-				getRandomDirection(),// TODO get direction by keypress
+				new Direction(0.45),
+//				getRandomDirection(),// TODO get direction by keypress
 //                directionByKeyPress();
 				startPoint.getX(),
 				startPoint.getY()
@@ -95,8 +96,9 @@ public class Simulator  implements Runnable {
 		// - *
 		// - -
 		agents[i++] = grid[startPoint.getX()+4][startPoint.getY()] = new Agent(
-				AgentBehaviour.NORMAL,
-				getRandomDirection(),// TODO get direction by keypress
+				AgentBehaviour.FOLLOW_LEFT,
+				new Direction(0.45),
+//				getRandomDirection(),// TODO get direction by keypress
 //                followFromLeft()
 				startPoint.getX()+4,
 				startPoint.getY()
@@ -167,12 +169,13 @@ public class Simulator  implements Runnable {
 			for (Agent agent : agents) {
 				tmpPos.x = agent.x;
 				tmpPos.y = agent.y;
-				agent.dailyCycle();
-				if(agent.getAgentBehaviour().equals(AgentBehaviour.SWARM_LEADER) && !agent.getCommand().equals("")){
-					panel.updateScreens(agent.getCommand());
-				}else{
 
+				if(panel != null && panel.getScreens() != null && panel.getScreens().getAgentPanelsArr() != null) {
+					agent.dailyCycle();
+					if (!agent.getCommand().equals(""))
+						panel.updateScreens(agent.getCommand(), agent.getAgentBehaviour());
 				}
+
 				if (!agent.getPos().equals(tmpPos)) ensureAgentInValidPos(tmpPos, agent);
 			}
 			checkLocalityPrinciple();
@@ -194,10 +197,9 @@ public class Simulator  implements Runnable {
 
 	}
 
-	private void updateScreens(String command) {
-
+	public FollowScreensPanel getPanel() {
+		return panel.getScreens();
 	}
-
 
 	private void ensureAgentInValidPos(Vector2D oldPos, Agent agent) {
 		if (agent.getX() < 0) agent.x = MAX_X + agent.getX();
