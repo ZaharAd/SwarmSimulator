@@ -79,16 +79,15 @@ public class Simulator  implements Runnable {
 		System.out.println("Initialising the simulation");
 		grid = new Agent[MAX_X][MAX_Y];
 		int i = 0;
-		Vector2D startPoint = new Vector2D(10,10);
+		Vector2D startPoint = new Vector2D(10, MAX_Y -20);
+		Direction startDir = new Direction(0.1);
 
 		//leader
 		// * -
 		// - -
 		agents[i++] = grid[startPoint.getX()][startPoint.getY()] = new Agent(
 				AgentBehaviour.SWARM_LEADER,
-				new Direction(0.45),
-//				getRandomDirection(),// TODO get direction by keypress
-//                directionByKeyPress();
+				startDir,
 				startPoint.getX(),
 				startPoint.getY()
 		);
@@ -96,10 +95,9 @@ public class Simulator  implements Runnable {
 		// - *
 		// - -
 		agents[i++] = grid[startPoint.getX()+4][startPoint.getY()] = new Agent(
-				AgentBehaviour.FOLLOW_LEFT,
-				new Direction(0.45),
-//				getRandomDirection(),// TODO get direction by keypress
-//                followFromLeft()
+				AgentBehaviour.FOLLOW_LEFT, //TODO presntation
+//				AgentBehaviour.NORMAL,
+				startDir,
 				startPoint.getX()+4,
 				startPoint.getY()
 		);
@@ -110,18 +108,18 @@ public class Simulator  implements Runnable {
 		agents[i++] = grid[startPoint.getX()][startPoint.getY() -4] = new Agent(
 				AgentBehaviour.NORMAL,
 				//followFromFront
-				getRandomDirection(),// TODO get direction by keypress
+				startDir,
 				startPoint.getX(),
-				startPoint.getY() -4
+				startPoint.getY() + 4
 		);
 		// - -
 		// - *
 		agents[i++] = grid[startPoint.getX() + 4][startPoint.getY() -4] = new Agent(
 				AgentBehaviour.NORMAL,
 				//followFromFront
-				getRandomDirection(),// TODO get direction by keypress
+				startDir,
 				startPoint.getX() + 4,
-				startPoint.getX() -4
+				startPoint.getY()  + 4
 		);
 	}
 
@@ -179,7 +177,6 @@ public class Simulator  implements Runnable {
 				if (!agent.getPos().equals(tmpPos)) ensureAgentInValidPos(tmpPos, agent);
 			}
 			checkLocalityPrinciple();
-			//printAgents();
 			today.add(Calendar.DAY_OF_MONTH, 1);
 			try {
 				Thread.sleep(TIME_STEP);

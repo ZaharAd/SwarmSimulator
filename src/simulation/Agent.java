@@ -28,8 +28,10 @@ public class Agent {
 	private MixedAgentSettings mixedAgentSettings = new MixedAgentSettings();
 	private String command ="";
 
-	public AgentDailyCycle leaderCycle = new ByPressCycle();
-	public AgentDailyCycle leftMemberCycle = new followFromLeftCycle();
+	private AgentDailyCycle leaderCycle = new ByPressCycle();
+	private AgentDailyCycle rightMemberCycle = new followFromLeftCycle();
+	private AgentDailyCycle backMemberCycle = new followFromFrontCycle();
+	public AgentDailyCycle normal = new NormalAgentDailyCycle();
 
 	public AgentDailyCycle getLeaderCycle() {
 		return leaderCycle;
@@ -57,7 +59,8 @@ public class Agent {
 	public void dailyCycle() {
 		switch(behaviour) {
 			case SWARM_LEADER:leaderCycle.dailyCycle(); break;
-			case FOLLOW_LEFT:leftMemberCycle.dailyCycle(); break;
+			case FOLLOW_LEFT:rightMemberCycle.dailyCycle(); break;
+			case FOLLOW_FRONT: backMemberCycle.dailyCycle(); break;
 //			case MIXED:
 //				if (mixedAgentSettings.timeAsRebel > 0) {
 //					rebelCycle.dailyCycle();
@@ -83,7 +86,7 @@ public class Agent {
 	}
 
 
-	public void goAhead() {
+	private void goAhead() {
 		double angle = Math.toRadians(direction.getAngle());
 		double xDiff = Math.sin(angle);
 		double yDiff = Math.cos(angle);
@@ -91,7 +94,7 @@ public class Agent {
 		y -= yDiff;
 	}
 
-	public void goToSide(String side) {
+	private void goToSide(String side) {
 		double angle;
 		if(side.equals("left")){
 			angle = Math.toRadians(direction.getAngle() - 90);
@@ -215,36 +218,45 @@ public class Agent {
 
 		@Override
 		public void dailyCycle() {
-			AgentPaintedPanel[] memberPanels = sim.getPanel().getAgentPanelsArr();
-			for (int i = 0; i < memberPanels.length; i++) {
-				if(memberPanels[i].getIRdim() == memberPanels[i].getLastIRdim() + 2){
-					setCommand("goLeft");
-					goToSide("left");
-					memberPanels[i].setIRdim(memberPanels[i].getLastIRdim());
-				}
 
-				if(memberPanels[i].getIRdim() == memberPanels[i].getLastIRdim() - 2){
-					setCommand("goRight");
-					goToSide("right");
-					memberPanels[i].setIRdim(memberPanels[i].getLastIRdim());
-				}
+			AgentPaintedPanel fromLeftTrack = sim.getPanel().getAgentPanelsArr()[0];
 
-				if (memberPanels[i].getX_1() == memberPanels[i].getLastLocation()[0]
-						&& memberPanels[i].getX_2() == memberPanels[i].getLastLocation()[2]){
-					setCommand("stop");
-				}
+			if (fromLeftTrack.getX_1() == fromLeftTrack.getLastLocation()[0] + 15
+					&& fromLeftTrack.getX_2() == fromLeftTrack.getLastLocation()[2] + 15) {
+				setCommand("goAhed");
+				goAhead();
+			}else if(fromLeftTrack.getIRdim() < fromLeftTrack.getCurrIRdim()){
+				setCommand("goRight");
+				goToSide("right");
+			}else if(fromLeftTrack.getIRdim() > fromLeftTrack.getCurrIRdim()){
+				setCommand("goLeft");
+				goToSide("left");
+			}else{
+				setCommand("stop");
+			}
+		}
+	}
 
-				if (memberPanels[i].getX_1() == memberPanels[i].getLastLocation()[0] + 15
-						&& memberPanels[i].getX_2() == memberPanels[i].getLastLocation()[2] + 15) {
-					setCommand("goAhed");
-					goAhead();
-				}
+	public class followFromFrontCycle implements AgentDailyCycle {
 
-				if (memberPanels[i].getX_1() == memberPanels[i].getLastLocation()[0] - 15
-						&& memberPanels[i].getX_2() == memberPanels[i].getLastLocation()[2] - 15) {
-					setCommand("goBack");
-				}
+		@Override
+		public void dailyCycle() {
+			AgentPaintedPanel fromFrontTrack = sim.getPanel().getAgentPanelsArr()[0];
 
+			if (fromFrontTrack.getX_1() == fromFrontTrack.getLastLocation()[0] + 15
+					&& fromFrontTrack.getX_2() == fromFrontTrack.getLastLocation()[2] + 15) {
+				setCommand("goRight");
+				goToSide("right");
+
+			}else if (fromFrontTrack.getX_1() == fromFrontTrack.getLastLocation()[0] - 15
+					&& fromFrontTrack.getX_2() == fromFrontTrack.getLastLocation()[2] - 15) {
+				setCommand("goLeft");
+				goToSide("left");
+
+			}else if(fromFrontTrack.getIRdim() > fromFrontTrack.getCurrIRdim()){
+				setCommand("goAhed");
+				goAhead();
+			}else{
 				setCommand("stop");
 			}
 		}

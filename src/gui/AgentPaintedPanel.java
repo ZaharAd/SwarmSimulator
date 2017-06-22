@@ -8,13 +8,13 @@ import java.awt.*;
  */
 
 public class AgentPaintedPanel extends JPanel {
-    private int IRdim = 7;
+    private final int IRdim = 7;
     private int X_1, Y_1;// first IR
     private int X_2, Y_2;// second IR
     private String cameraSide;
 
     private int[] lastLocation;
-    private int lastIRdim = IRdim;
+    private int currIRdim = IRdim;
 
     public void repaintPixel(){
         repaint();
@@ -36,8 +36,8 @@ public class AgentPaintedPanel extends JPanel {
         return lastLocation;
     }
 
-    public int getLastIRdim() {
-        return lastIRdim;
+    public int getCurrIRdim() {
+        return currIRdim;
     }
 
     public String getCameraSide() {
@@ -68,9 +68,9 @@ public class AgentPaintedPanel extends JPanel {
         return IRdim;
     }
 
-    public void setIRdim(int IRdim) {
-        lastIRdim = this.IRdim;
-        this.IRdim = IRdim;
+    public void setCurrIRdim(int IRdim) {
+        currIRdim = IRdim;
+//        this.IRdim = IRdim;
     }
 
     @Override
