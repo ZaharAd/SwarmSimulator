@@ -47,7 +47,7 @@ public class Simulator  implements Runnable {
 	static final Random randomGenerator = new Random();
 
 	private static final Simulator sim = new Simulator();
-
+	private boolean firstInSecRow = true;
 
 	private Agent[] agents = new Agent[N_OF_AGENTS];
 
@@ -94,20 +94,19 @@ public class Simulator  implements Runnable {
 		//leaders row
 		// - *
 		// - -
-		agents[i++] = grid[startPoint.getX()+4][startPoint.getY()] = new Agent(
-				AgentBehaviour.FOLLOW_LEFT, //TODO presntation
+		agents[i++] = grid[startPoint.getX() + 4][startPoint.getY()] = new Agent(
+				AgentBehaviour.FOLLOW_LEFT,
 //				AgentBehaviour.NORMAL,
 				startDir,
-				startPoint.getX()+4,
+				startPoint.getX() + 4,
 				startPoint.getY()
 		);
 
 		//behind leader
 		// - -
 		// * -
-		agents[i++] = grid[startPoint.getX()][startPoint.getY() -4] = new Agent(
-				AgentBehaviour.NORMAL,
-				//followFromFront
+		agents[i++] = grid[startPoint.getX()][startPoint.getY() - 4] = new Agent(
+				AgentBehaviour.FOLLOW_FRONT,
 				startDir,
 				startPoint.getX(),
 				startPoint.getY() + 4
@@ -115,8 +114,7 @@ public class Simulator  implements Runnable {
 		// - -
 		// - *
 		agents[i++] = grid[startPoint.getX() + 4][startPoint.getY() -4] = new Agent(
-				AgentBehaviour.NORMAL,
-				//followFromFront
+				AgentBehaviour.LAST,
 				startDir,
 				startPoint.getX() + 4,
 				startPoint.getY()  + 4
@@ -167,6 +165,8 @@ public class Simulator  implements Runnable {
 			for (Agent agent : agents) {
 				tmpPos.x = agent.x;
 				tmpPos.y = agent.y;
+
+
 
 				if(panel != null && panel.getScreens() != null && panel.getScreens().getAgentPanelsArr() != null) {
 					agent.dailyCycle();
@@ -242,4 +242,11 @@ public class Simulator  implements Runnable {
 		}
 	}
 
+	public boolean isFirstInSecRow() {
+		return firstInSecRow;
+	}
+
+	public void setFirstInSecRow(boolean firstInSecRow) {
+		this.firstInSecRow = firstInSecRow;
+	}
 }

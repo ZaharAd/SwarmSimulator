@@ -21,10 +21,6 @@ public class FollowScreensPanel extends JPanel {
     private Dimension leaderLocation;//, secondLocation, behindeLocation, lastLocation;
 
     public FollowScreensPanel() {
-        init();
-    }
-
-    private void init() {
         leaderLocation = new Dimension(Simulator.MAX_X*SCALE +10, 0);
 
 
@@ -72,11 +68,6 @@ public class FollowScreensPanel extends JPanel {
         JSplitPane pane = new JSplitPane(JSplitPane.VERTICAL_SPLIT,firstRow, secRow);
         pane.setDividerLocation(Simulator.MAX_Y*SCALE / 2);
         add(pane);
-
-
-
-
-
     }
 
     public AgentPaintedPanel[] getAgentPanelsArr (){

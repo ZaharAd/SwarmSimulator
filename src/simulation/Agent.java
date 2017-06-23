@@ -3,6 +3,7 @@ package simulation;
 import gui.AgentPaintedPanel;
 import gui.SwarmPanel;
 
+import java.util.Arrays;
 import java.util.List;
 
 import simulation.util.Vector2D;
@@ -10,13 +11,7 @@ import simulation.util.Vector2D;
 public class Agent {
 
 
-	public enum AgentBehaviour { NORMAL, REBEL, MIXED, SWARM_LEADER , FOLLOW_LEFT, FOLLOW_FRONT }
-
-	private class MixedAgentSettings {
-		static final double P_OF_GETTING_REBEL = 0.01;
-		static final int T_AS_REBEL = 500;
-		int timeAsRebel = 0;
-	}
+	public enum AgentBehaviour { NORMAL, REBEL, MIXED, SWARM_LEADER , FOLLOW_LEFT, FOLLOW_FRONT , LAST }
 
 	private static final int INERTIA = 3;
 	private static final int REACH = 20;
@@ -24,26 +19,15 @@ public class Agent {
 	double x;
 	double y;
 	private Direction direction;
-	private AgentBehaviour behaviour = AgentBehaviour.NORMAL;
-	private MixedAgentSettings mixedAgentSettings = new MixedAgentSettings();
+	private AgentBehaviour behaviour;
 	private String command ="";
 
 	private AgentDailyCycle leaderCycle = new ByPressCycle();
 	private AgentDailyCycle rightMemberCycle = new followFromLeftCycle();
 	private AgentDailyCycle backMemberCycle = new followFromFrontCycle();
-	public AgentDailyCycle normal = new NormalAgentDailyCycle();
 
-	public AgentDailyCycle getLeaderCycle() {
-		return leaderCycle;
-	}
 
 	private static Simulator sim = Simulator.getInstance();
-
-	public Agent(Direction direction, int x, int y) {
-		this.x = x;
-		this.y = y;
-		this.direction = direction;
-	}
 
 	public Agent(AgentBehaviour behaviour, Direction direction, int x, int y) {
 		this.behaviour = behaviour;
@@ -61,6 +45,7 @@ public class Agent {
 			case SWARM_LEADER:leaderCycle.dailyCycle(); break;
 			case FOLLOW_LEFT:rightMemberCycle.dailyCycle(); break;
 			case FOLLOW_FRONT: backMemberCycle.dailyCycle(); break;
+			case LAST: backMemberCycle.dailyCycle(); break;
 //			case MIXED:
 //				if (mixedAgentSettings.timeAsRebel > 0) {
 //					rebelCycle.dailyCycle();
@@ -120,7 +105,7 @@ public class Agent {
 			y -= willingness;
 		}
 		if (position.distance(x, y) < AGENT_SIZE) {
-			moveAwayFrom(position);
+			moveAwayFrom(position);// TODO use in the rabel
 		}
 	}
 
@@ -221,8 +206,8 @@ public class Agent {
 
 			AgentPaintedPanel fromLeftTrack = sim.getPanel().getAgentPanelsArr()[0];
 
-			if (fromLeftTrack.getX_1() == fromLeftTrack.getLastLocation()[0] + 15
-					&& fromLeftTrack.getX_2() == fromLeftTrack.getLastLocation()[2] + 15) {
+			if (fromLeftTrack.getX_1() == fromLeftTrack.getCurrX_1() - 15
+					&& fromLeftTrack.getX_2() == fromLeftTrack.getCurrX_2() -  15) {
 				setCommand("goAhed");
 				goAhead();
 			}else if(fromLeftTrack.getIRdim() < fromLeftTrack.getCurrIRdim()){
@@ -237,25 +222,34 @@ public class Agent {
 		}
 	}
 
+
 	public class followFromFrontCycle implements AgentDailyCycle {
 
 		@Override
 		public void dailyCycle() {
-			AgentPaintedPanel fromFrontTrack = sim.getPanel().getAgentPanelsArr()[0];
+			AgentPaintedPanel fromFrontTrack;
 
-			if (fromFrontTrack.getX_1() == fromFrontTrack.getLastLocation()[0] + 15
-					&& fromFrontTrack.getX_2() == fromFrontTrack.getLastLocation()[2] + 15) {
-				setCommand("goRight");
-				goToSide("right");
+			if(behaviour.equals(AgentBehaviour.FOLLOW_FRONT)) {
+				fromFrontTrack = sim.getPanel().getAgentPanelsArr()[1];
+			}else {
+				fromFrontTrack = sim.getPanel().getAgentPanelsArr()[2];
+			}
+//
+//			System.out.println("irDim: " + fromFrontTrack.getIRdim()  + ", curr: " + fromFrontTrack.getCurrIRdim());
+			System.out.println("getX_1(): " + fromFrontTrack.getX_1()  + ", getX_2(): " + fromFrontTrack.getX_2());
+			System.out.println("getX_1(): " + fromFrontTrack.getCurrX_1()  + ", getX_2(): " + fromFrontTrack.getCurrX_2());
 
-			}else if (fromFrontTrack.getX_1() == fromFrontTrack.getLastLocation()[0] - 15
-					&& fromFrontTrack.getX_2() == fromFrontTrack.getLastLocation()[2] - 15) {
-				setCommand("goLeft");
-				goToSide("left");
-
-			}else if(fromFrontTrack.getIRdim() > fromFrontTrack.getCurrIRdim()){
+			if(fromFrontTrack.getIRdim() > fromFrontTrack.getCurrIRdim()){
 				setCommand("goAhed");
 				goAhead();
+			}else if (fromFrontTrack.getX_1() == fromFrontTrack.getCurrX_1() -  15
+					&& fromFrontTrack.getX_2() == fromFrontTrack.getCurrX_2() -  15) {
+				setCommand("goRight");
+				goToSide("right");
+			}else if(fromFrontTrack.getX_1() == fromFrontTrack.getCurrX_1() + 15
+					&& fromFrontTrack.getX_2() == fromFrontTrack.getCurrX_2() + 15) {
+				setCommand("goLeft");
+				goToSide("left");
 			}else{
 				setCommand("stop");
 			}
@@ -289,7 +283,6 @@ public class Agent {
 				goAhead();
 			}
 		}
-
 	}
 
 	private class RebelAgentDailyCycle implements AgentDailyCycle {
