@@ -32,8 +32,7 @@ public class SwarmPanel extends JPanel implements KeyListener {
 	private int angle ;
 	private double hight;
 	private boolean isTurn = false;
-	private int[] lastLoaction;
-
+	private int rabelError = 0;
 
 	public void stop() {
 		running = false;
@@ -124,115 +123,6 @@ public class SwarmPanel extends JPanel implements KeyListener {
 		return screens;
 	}
 
-	public void updateScreens(String command, Agent.AgentBehaviour agentBehaviour) {
-		System.out.println("command " + command + ", " + agentBehaviour);
-
-		switch (command) {
-			case "goAhed":
-				switch (agentBehaviour){
-					case SWARM_LEADER:
-						screens.getSecondPanel().setCurrX_1(screens.getSecondPanel().getX_1() + 15);
-						screens.getSecondPanel().setCurrX_2(screens.getSecondPanel().getX_1() + 15);
-						screens.getSecondPanel().repaintPixel();
-
-						screens.getBehindLeaderPanel().setCurrIRdim(screens.getSecondPanel().getIRdim() - 2);
-						screens.getBehindLeaderPanel().repaintPixel();
-
-						break;
-					case FOLLOW_LEFT:
-						screens.getSecondPanel().setCurrX_1(screens.getSecondPanel().getX_1());
-						screens.getSecondPanel().setCurrX_2(screens.getSecondPanel().getX_1());
-						screens.getSecondPanel().repaintPixel();
-
-						screens.getLastPanel().setCurrIRdim(screens.getSecondPanel().getIRdim() - 2);
-						screens.getLastPanel().repaintPixel();
-
-						break;
-					case FOLLOW_FRONT:
-						screens.getBehindLeaderPanel().setCurrIRdim(screens.getBehindLeaderPanel().getIRdim());
-						screens.getBehindLeaderPanel().repaintPixel();
-
-						break;
-					case LAST:
-						screens.getLastPanel().setCurrIRdim(screens.getLastPanel().getIRdim());
-						screens.getLastPanel().repaintPixel();
-
-						break;
-				}
-				break;
-			case "goRight":
-				switch (agentBehaviour){
-					case SWARM_LEADER:
-						screens.getSecondPanel().setCurrIRdim(screens.getSecondPanel().getIRdim() + 2);
-						screens.getSecondPanel().repaintPixel();
-
-						screens.getBehindLeaderPanel().setCurrX_1(screens.getBehindLeaderPanel().getX_1() + 15);
-						screens.getBehindLeaderPanel().setCurrX_2(screens.getBehindLeaderPanel().getX_2() + 15);
-						screens.getBehindLeaderPanel().repaintPixel();
-
-						break;
-					case FOLLOW_LEFT:
-						screens.getSecondPanel().setCurrIRdim(screens.getSecondPanel().getIRdim());
-						screens.getSecondPanel().repaintPixel();
-
-						screens.getLastPanel().setCurrX_1(screens.getLastPanel().getX_1() + 15);
-						screens.getLastPanel().setCurrX_2(screens.getLastPanel().getX_2() + 15);
-						screens.getLastPanel().repaintPixel();
-
-						break;
-					case FOLLOW_FRONT:
-						screens.getBehindLeaderPanel().setCurrX_1(screens.getBehindLeaderPanel().getX_1());
-						screens.getBehindLeaderPanel().setCurrX_2(screens.getBehindLeaderPanel().getX_2());
-						screens.getBehindLeaderPanel().repaintPixel();
-
-						break;
-					case LAST:
-						screens.getLastPanel().setCurrX_1(screens.getLastPanel().getX_1());
-						screens.getLastPanel().setCurrX_2(screens.getLastPanel().getX_2());
-						screens.getLastPanel().repaintPixel();
-
-						break;
-				}
-				break;
-			case "goLeft":
-				switch (agentBehaviour){
-					case SWARM_LEADER:
-						screens.getSecondPanel().setCurrIRdim(screens.getSecondPanel().getIRdim() - 2);
-						screens.getSecondPanel().repaintPixel();
-
-						screens.getBehindLeaderPanel().setCurrX_1(screens.getBehindLeaderPanel().getX_1() - 15);
-						screens.getBehindLeaderPanel().setCurrX_2(screens.getBehindLeaderPanel().getX_2() - 15);
-						screens.getBehindLeaderPanel().repaintPixel();
-
-						break;
-					case FOLLOW_LEFT:
-						screens.getSecondPanel().setCurrIRdim(screens.getSecondPanel().getIRdim());
-						screens.getSecondPanel().repaintPixel();
-
-						screens.getLastPanel().setCurrX_1(screens.getLastPanel().getX_1() - 15);
-						screens.getLastPanel().setCurrX_2(screens.getLastPanel().getX_2() - 15);
-						screens.getLastPanel().repaintPixel();
-
-						break;
-					case FOLLOW_FRONT:
-						screens.getBehindLeaderPanel().setCurrX_1(screens.getBehindLeaderPanel().getX_1());
-						screens.getBehindLeaderPanel().setCurrX_2(screens.getBehindLeaderPanel().getX_2());
-						screens.getBehindLeaderPanel().repaintPixel();
-
-						break;
-					case LAST:
-						screens.getLastPanel().setCurrX_1(screens.getLastPanel().getX_1());
-						screens.getLastPanel().setCurrX_2(screens.getLastPanel().getX_2());
-						screens.getLastPanel().repaintPixel();
-
-						break;
-				}
-				break;
-			case "stop":
-				break;
-		}
-	}
-
 
 	@Override
 	public void keyTyped(KeyEvent e) {
@@ -307,5 +197,6 @@ public class SwarmPanel extends JPanel implements KeyListener {
 
 		hight = 0;
 	}
+
 }
 

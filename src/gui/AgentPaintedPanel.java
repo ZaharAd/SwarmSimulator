@@ -1,7 +1,10 @@
 package gui;
 
+import simulation.Agent;
+
 import javax.swing.*;
 import java.awt.*;
+import java.awt.image.BufferedImage;
 
 /**
  * Created by zahar on 16/06/17.
@@ -9,36 +12,18 @@ import java.awt.*;
 
 public class AgentPaintedPanel extends JPanel {
     private final int IRdim = 7;
-    private int X_1 = 150, Y_1 = 100;// first IR point
-    private int X_2 = 150, Y_2 = 200;// second IR point
+    private final int X_1 = 150, Y_1 = 100;// first IR point
+    private final int X_2 = 150, Y_2 = 200;// second IR point
+    private final int diffDim = 2 , diffX = 15;
     private String cameraSide;
-
-//    private int[] lastLocation;
 
     private int currX_1 = X_1 , currY_1 = Y_1, currX_2 = X_2, currY_2 = Y_2;
     private int currIRdim = IRdim;
 
+
     public void repaintPixel(){
-//        lastLocation = new int[]{X_1,Y_1,X_2,Y_2};
         repaint();
     }
-
-    public void paintPixel(int x1 , int y1 , int x2, int y2){
-//        lastLocation = new int[]{X_1,Y_1,X_2,Y_2};
-
-        X_1 = x1;
-        Y_1 = y1;
-
-        X_2 = x2;
-        Y_2 = y2;
-
-        repaint();
-    }
-
-//    public int[] getLastLocation() {
-//        return lastLocation;
-//    }
-
 
     public void setCameraSide(String cameraSide) {
         this.cameraSide = cameraSide;
@@ -48,16 +33,8 @@ public class AgentPaintedPanel extends JPanel {
         return X_1;
     }
 
-    public int getY_1() {
-        return Y_1;
-    }
-
     public int getX_2() {
         return X_2;
-    }
-
-    public int getY_2() {
-        return Y_2;
     }
 
     public int getIRdim() {
@@ -72,40 +49,124 @@ public class AgentPaintedPanel extends JPanel {
         return currIRdim;
     }
 
-    public int getCurrX_1() {
-        return currX_1;
-    }
-
     public void setCurrX_1(int currX_1) {
         this.currX_1 = currX_1;
-    }
-
-    public int getCurrY_1() {
-        return currY_1;
-    }
-
-    public void setCurrY_1(int currY_1) {
-        this.currY_1 = currY_1;
-    }
-
-    public int getCurrX_2() {
-        return currX_2;
     }
 
     public void setCurrX_2(int currX_2) {
         this.currX_2 = currX_2;
     }
 
-    public int getCurrY_2() {
-        return currY_2;
+    public int getCurrX_1() {
+        return currX_1;
     }
 
-    public void setCurrY_2(int currY_2) {
-        this.currY_2 = currY_2;
+    public int getCurrX_2() {
+        return currX_2;
     }
 
-    public String getCameraSide() {
-        return cameraSide;
+    public int getDiffDim() {
+        return diffDim;
+    }
+
+    public int getDiffX() {
+        return diffX;
+    }
+
+    public String findIRpoint(Agent.AgentSwarmBehaviour behaviour) {
+        String ans = "";
+
+        switch (behaviour){
+            case FOLLOW_LEFT:
+                ans = firstRowReading();
+                return ans;
+            case FOLLOW_FRONT:
+                ans = secRowReading();
+                return ans;
+            case LAST:
+                ans = secRowReading();
+                return ans;
+        }
+
+        return "error";
+    }
+
+    private String firstRowReading() {
+        BufferedImage img= new BufferedImage(300, 300, BufferedImage.TYPE_BYTE_INDEXED);
+        Graphics2D g2 =img.createGraphics();
+        this.paint(g2);
+
+        for (int i = 0; i < 300; i++) {
+            for (int j = 0; j < 300; j++) {
+                if(new Color(img.getRGB(i,j)).equals(Color.RED)){
+                    System.out.println(i + ", " + j);
+                }
+            }
+        }
+
+        if ((new Color(img.getRGB(X_1 - IRdim ,Y_1 - IRdim)).equals(Color.BLACK))
+                && (new Color(img.getRGB(X_2 - IRdim ,Y_2 - IRdim)).equals(Color.BLACK))
+                && (new Color(img.getRGB(X_1 - IRdim + diffX, Y_1 - IRdim)).equals(Color.RED))
+                && (new Color(img.getRGB(X_2 - IRdim + diffX, Y_1 - IRdim)).equals(Color.RED))) {
+            g2.dispose();
+            return "front";
+        }else if ((new Color(img.getRGB(X_1 - IRdim - diffDim ,Y_1 - IRdim - diffDim)).equals(Color.RED))
+                && (new Color(img.getRGB(X_2 - IRdim - diffDim ,Y_2 - IRdim - diffDim)).equals(Color.RED))){
+            g2.dispose();
+            return "right";
+        }else if ((new Color(img.getRGB(X_1 - IRdim ,Y_1 - IRdim)).equals(Color.BLACK))
+                && (new Color(img.getRGB(X_2 - IRdim,Y_2 - IRdim)).equals(Color.BLACK))
+                && (new Color(img.getRGB(X_1 - IRdim + diffDim ,Y_1 - IRdim + diffDim)).equals(Color.RED))
+                && (new Color(img.getRGB(X_2 - IRdim + diffDim ,Y_2 - IRdim + diffDim)).equals(Color.RED))){
+            g2.dispose();
+            return "left";
+        }else {
+            g2.dispose();
+            return "stop";
+        }
+    }
+
+    private String secRowReading() {
+        BufferedImage img= new BufferedImage(300, 300, BufferedImage.SCALE_DEFAULT);
+        Graphics2D g2 =img.createGraphics();
+        this.paint(g2);
+
+
+
+        for (int i = 0; i < 300; i++) {
+            for (int j = 0; j < 300; j++) {
+                if(new Color(img.getRGB(i,j)).equals(Color.RED)){
+                    System.out.println(i + ", " + j);
+                }
+            }
+        }
+
+        if ((new Color(img.getRGB(X_1 - IRdim ,Y_1 - IRdim)).equals(Color.BLACK))
+                && (new Color(img.getRGB(X_2 - IRdim ,Y_2 - IRdim)).equals(Color.BLACK))
+                && (new Color(img.getRGB(X_1 - IRdim + diffX, Y_1 - IRdim)).equals(Color.RED))
+                && (new Color(img.getRGB(X_2 - IRdim + diffX, Y_1 - IRdim)).equals(Color.RED))){
+            g2.dispose();
+            return "right";
+        }else if ((new Color(img.getRGB(X_1 - IRdim ,Y_1 - IRdim)).equals(Color.BLACK))
+                && (new Color(img.getRGB(X_2 - IRdim ,Y_2 - IRdim)).equals(Color.BLACK))
+                && (new Color(img.getRGB(X_1 - IRdim - diffX, Y_1 - IRdim)).equals(Color.RED))
+                && (new Color(img.getRGB(X_2 - IRdim - diffX, Y_1 - IRdim)).equals(Color.RED))){
+            g2.dispose();
+            return "left";
+        }else if ((new Color(img.getRGB(X_1 - IRdim ,Y_1 - IRdim)).equals(Color.BLACK))
+                && (new Color(img.getRGB(X_2 - IRdim,Y_2 - IRdim)).equals(Color.BLACK))
+                && (new Color(img.getRGB(X_1 - IRdim + diffDim ,Y_1 - IRdim + diffDim)).equals(Color.RED))
+                && (new Color(img.getRGB(X_2 - IRdim + diffDim ,Y_2 - IRdim + diffDim)).equals(Color.RED))) {
+            g2.dispose();
+            return "front";
+        }else if ((new Color(img.getRGB(X_1 - IRdim - diffDim,Y_1 - IRdim -diffDim)).equals(Color.RED))
+                && (new Color(img.getRGB(X_2 - IRdim - diffDim,Y_2 - IRdim -diffDim)).equals(Color.RED))){
+            g2.dispose();
+            return "back";
+        }else {
+            g2.dispose();
+            return "stop";
+        }
     }
 
     @Override

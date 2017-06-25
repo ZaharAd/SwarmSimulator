@@ -38,18 +38,13 @@ public class FollowScreensPanel extends JPanel {
         LastPanel = new AgentPaintedPanel();
 
         members =new AgentPaintedPanel[] {SecondPanel, BehindLeaderPanel, LastPanel};
-//        Dimension dimIR1 = new Dimension(150,100);
-//        Dimension dimIR2 = new Dimension(150,200);
 
         LeaderPanel.setBackground(Color.yellow);
         SecondPanel.setBackground(Color.black);
-        SecondPanel.paintPixel(150, 100 , 150, 200);
         SecondPanel.setCameraSide("left");
         BehindLeaderPanel.setBackground(Color.black);
-        BehindLeaderPanel.paintPixel(150, 100 , 150, 200);
         BehindLeaderPanel.setCameraSide("front");
         LastPanel.setBackground(Color.black);
-        LastPanel.paintPixel(150, 100 , 150, 200);
         LastPanel.setCameraSide("front");
 //
 //        JLabel direction = new JLabel();

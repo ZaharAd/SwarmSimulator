@@ -3,15 +3,17 @@ package simulation;
 import gui.AgentPaintedPanel;
 import gui.SwarmPanel;
 
-import java.util.Arrays;
-import java.util.List;
+import java.util.Timer;
+import java.util.TimerTask;
 
 import simulation.util.Vector2D;
+
+import static simulation.Agent.AgentSwarmBehaviour.*;
 
 public class Agent {
 
 
-	public enum AgentBehaviour { NORMAL, REBEL, MIXED, SWARM_LEADER , FOLLOW_LEFT, FOLLOW_FRONT , LAST }
+	public enum AgentSwarmBehaviour { SWARM_LEADER , FOLLOW_LEFT, FOLLOW_FRONT , LAST }
 
 	private static final int INERTIA = 3;
 	private static final int REACH = 20;
@@ -19,8 +21,14 @@ public class Agent {
 	double x;
 	double y;
 	private Direction direction;
-	private AgentBehaviour behaviour;
+	private AgentSwarmBehaviour behaviour;
 	private String command ="";
+	private boolean isRabel = false;
+	private int rabelCount;
+	private double xDiff;
+	private double yDiff;
+	private double rabelErrorX;
+	private double rabelErrorY;
 
 	private AgentDailyCycle leaderCycle = new ByPressCycle();
 	private AgentDailyCycle rightMemberCycle = new followFromLeftCycle();
@@ -29,14 +37,25 @@ public class Agent {
 
 	private static Simulator sim = Simulator.getInstance();
 
-	public Agent(AgentBehaviour behaviour, Direction direction, int x, int y) {
+	public Agent(AgentSwarmBehaviour behaviour, Direction direction, int x, int y) {
 		this.behaviour = behaviour;
 		this.x = x;
 		this.y = y;
 		this.direction = direction;
 	}
 
-	public AgentBehaviour getAgentBehaviour() {
+	public Agent(AgentSwarmBehaviour behaviour, Direction direction, int x, int y, boolean isRabel) {
+		this.behaviour = behaviour;
+		this.x = x;
+		this.y = y;
+		this.direction = direction;
+		this.isRabel = isRabel;
+		rabelCount = 0;
+		rabelErrorX = 0;
+		rabelErrorY = 0;
+	}
+
+	public AgentSwarmBehaviour getAgentBehaviour() {
 		return behaviour;
 	}
 
@@ -46,37 +65,24 @@ public class Agent {
 			case FOLLOW_LEFT:rightMemberCycle.dailyCycle(); break;
 			case FOLLOW_FRONT: backMemberCycle.dailyCycle(); break;
 			case LAST: backMemberCycle.dailyCycle(); break;
-//			case MIXED:
-//				if (mixedAgentSettings.timeAsRebel > 0) {
-//					rebelCycle.dailyCycle();
-//					mixedAgentSettings.timeAsRebel++;
-//					if (mixedAgentSettings.timeAsRebel > MixedAgentSettings.T_AS_REBEL) {
-//						mixedAgentSettings.timeAsRebel = 0;
-//					}
-//				} else if (Math.random() < MixedAgentSettings.P_OF_GETTING_REBEL) {
-//					sim.message("Agent turning rebel");
-//					rebelCycle.dailyCycle();
-//					mixedAgentSettings.timeAsRebel = 1;
-//				} else {
-//					normalCycle.dailyCycle();
-//				}
-//				break;
-//			case NORMAL: normalCycle.dailyCycle(); break;
-//			case REBEL: rebelCycle.dailyCycle(); break;
-//			case SWARM_LEADER: leaderCycle.dailyCycle(); break; //move by key press
-//			case FOLLOW_LEFT: swarmCycle.dailyCycle(); break;
-//			case FOLLOW_FRONT: swarmCycle.dailyCycle(); break;
-
 		}
 	}
 
 
 	private void goAhead() {
 		double angle = Math.toRadians(direction.getAngle());
-		double xDiff = Math.sin(angle);
-		double yDiff = Math.cos(angle);
+		xDiff = Math.sin(angle);
+		yDiff = Math.cos(angle);
 		x += xDiff;
 		y -= yDiff;
+	}
+
+	private void goBack() {
+		double angle = Math.toRadians(direction.getAngle());
+		xDiff = Math.sin(angle);
+		yDiff = Math.cos(angle);
+		x -= xDiff;
+		y += yDiff;
 	}
 
 	private void goToSide(String side) {
@@ -86,10 +92,30 @@ public class Agent {
 		}else {
 			angle = Math.toRadians(direction.getAngle() + 90);
 		}
-		double xDiff = Math.sin(angle);
-		double yDiff = Math.cos(angle);
+
+//		if(isRabel && rabelCount< 6) {
+//			xDiff = Math.sin(angle) * 0.4;
+//			yDiff = Math.cos(angle) * 0.4;
+//
+//			x += xDiff;
+//			y -= yDiff;
+//		}else {
+
+		xDiff = Math.sin(angle);
+		yDiff = Math.cos(angle);
+
 		x += xDiff;
 		y -= yDiff;
+	}
+
+	public static void setTimeout(Runnable runnable, int delay){
+
+		new Timer().schedule(new TimerTask() {
+			@Override
+			public void run() {
+
+			}
+		}, 2000);
 	}
 
 
@@ -168,14 +194,6 @@ public class Agent {
 		return "X=" + x + " Y=" + y + " D=" + direction;
 	}
 
-	private Agent getAgent() {
-		return this;
-	}
-
-	public String getCommand() {
-		return command;
-	}
-
 	public void setCommand(String command) {
 		this.command = command;
 	}
@@ -188,6 +206,9 @@ public class Agent {
 
 		@Override
 		public void dailyCycle() {
+			AgentPaintedPanel[] screensToUpdate = new AgentPaintedPanel[]{sim.getPanel().getAgentPanelsArr()[0] ,
+					sim.getPanel().getAgentPanelsArr()[1]};
+
 			if(command.equals("goAhed")){
 				goAhead();
 			}else if(command.equals("goRight")){
@@ -195,8 +216,10 @@ public class Agent {
 			}else if(command.equals("goLeft")){
 				goToSide("left");
 			}
-		}
+			System.out.println(behaviour + ", command:" + command + "\n");
 
+			updateFollowers(screensToUpdate, command);
+		}
 	}
 
 	public class followFromLeftCycle implements AgentDailyCycle {
@@ -204,95 +227,199 @@ public class Agent {
 		@Override
 		public void dailyCycle() {
 
-			AgentPaintedPanel fromLeftTrack = sim.getPanel().getAgentPanelsArr()[0];
+			AgentPaintedPanel secMemberPanel = sim.getPanel().getAgentPanelsArr()[0];
+			AgentPaintedPanel[] screensToUpdate = new AgentPaintedPanel[]{sim.getPanel().getAgentPanelsArr()[2]};
 
-			if (fromLeftTrack.getX_1() == fromLeftTrack.getCurrX_1() - 15
-					&& fromLeftTrack.getX_2() == fromLeftTrack.getCurrX_2() -  15) {
-				setCommand("goAhed");
-				goAhead();
-			}else if(fromLeftTrack.getIRdim() < fromLeftTrack.getCurrIRdim()){
-				setCommand("goRight");
-				goToSide("right");
-			}else if(fromLeftTrack.getIRdim() > fromLeftTrack.getCurrIRdim()){
-				setCommand("goLeft");
-				goToSide("left");
-			}else{
-				setCommand("stop");
-			}
+			String findIR = secMemberPanel.findIRpoint(behaviour);
+			System.out.println(behaviour + ", find:" + findIR+ "\n");
+			followIR(findIR);
+			updateFollowers(screensToUpdate,command);
+			updateSelfScreen(secMemberPanel);
 		}
 	}
+
 
 
 	public class followFromFrontCycle implements AgentDailyCycle {
 
 		@Override
 		public void dailyCycle() {
-			AgentPaintedPanel fromFrontTrack;
+			AgentPaintedPanel secRowsPanel;
 
-			if(behaviour.equals(AgentBehaviour.FOLLOW_FRONT)) {
-				fromFrontTrack = sim.getPanel().getAgentPanelsArr()[1];
+			if(behaviour.equals(FOLLOW_FRONT)) {
+				secRowsPanel = sim.getPanel().getAgentPanelsArr()[1];
 			}else {
-				fromFrontTrack = sim.getPanel().getAgentPanelsArr()[2];
+				secRowsPanel = sim.getPanel().getAgentPanelsArr()[2];
 			}
-//
-//			System.out.println("irDim: " + fromFrontTrack.getIRdim()  + ", curr: " + fromFrontTrack.getCurrIRdim());
-			System.out.println("getX_1(): " + fromFrontTrack.getX_1()  + ", getX_2(): " + fromFrontTrack.getX_2());
-			System.out.println("getX_1(): " + fromFrontTrack.getCurrX_1()  + ", getX_2(): " + fromFrontTrack.getCurrX_2());
 
-			if(fromFrontTrack.getIRdim() > fromFrontTrack.getCurrIRdim()){
-				setCommand("goAhed");
-				goAhead();
-			}else if (fromFrontTrack.getX_1() == fromFrontTrack.getCurrX_1() -  15
-					&& fromFrontTrack.getX_2() == fromFrontTrack.getCurrX_2() -  15) {
-				setCommand("goRight");
-				goToSide("right");
-			}else if(fromFrontTrack.getX_1() == fromFrontTrack.getCurrX_1() + 15
-					&& fromFrontTrack.getX_2() == fromFrontTrack.getCurrX_2() + 15) {
-				setCommand("goLeft");
-				goToSide("left");
-			}else{
-				setCommand("stop");
-			}
+			String findIR = secRowsPanel.findIRpoint(behaviour);
+			System.out.println(behaviour + ", find:" + findIR+ "\n");
+
+			followIR(findIR);
+			updateSelfScreen(secRowsPanel);
 		}
 	}
 
-	private class NormalAgentDailyCycle implements AgentDailyCycle {
+	private void updateFollowers(AgentPaintedPanel[] screensToUpdate, String command) {
+		int xdiff = screensToUpdate[0].getDiffX();
+		int dimdiff = screensToUpdate[0].getDiffDim();
+		switch (command) {
+			case "goAhed":
+				switch (behaviour){
+					case SWARM_LEADER:
+						screensToUpdate[0].setCurrX_1(screensToUpdate[0].getCurrX_1() + xdiff);
+						screensToUpdate[0].setCurrX_2(screensToUpdate[0].getCurrX_2() + xdiff);
+						screensToUpdate[0].repaintPixel();
 
-		@Override
-		public void dailyCycle() {
-			List<Agent> neighbours = sim.getNeighbours(getAgent(), REACH);
-			int numberOfFriends = neighbours.size();
+						screensToUpdate[1].setCurrIRdim(screensToUpdate[1].getCurrIRdim() - dimdiff);
+						screensToUpdate[1].repaintPixel();
 
-			if (numberOfFriends > 0) {
-				Vector2D avgPos = new Vector2D();
-				int avgDirection = 0;
-				for (Agent friend : neighbours) {
-					avgPos.add(friend.getX(), friend.getY());
-					avgDirection += friend.direction.getAngle();
+						break;
+					case FOLLOW_LEFT:
+						screensToUpdate[0].setCurrIRdim(screensToUpdate[0].getCurrIRdim() - dimdiff);
+						screensToUpdate[0].repaintPixel();
+
+						break;
 				}
-				avgPos.divide(numberOfFriends);
-				avgDirection /= numberOfFriends;
+				break;
+			case "goRight":
+				switch (behaviour){
+					case SWARM_LEADER:
+						screensToUpdate[0].setCurrIRdim(screensToUpdate[0].getCurrIRdim() + dimdiff);
+						screensToUpdate[0].repaintPixel();
 
-				double willingness = ((double) numberOfFriends)/ (double)INERTIA;
-				if (willingness > 1.0) willingness = 1.0;
-				steerTowards(avgPos, willingness);
-				headInTheSameDirection(avgDirection, willingness);
-				goAhead();
-			} else {
-				headSomewhere();
-				goAhead();
-			}
+						screensToUpdate[1].setCurrX_1(screensToUpdate[1].getCurrX_1() + xdiff);
+						screensToUpdate[1].setCurrX_2(screensToUpdate[1].getCurrX_2() + xdiff);
+						screensToUpdate[1].repaintPixel();
+
+						break;
+					case FOLLOW_LEFT:
+
+						screensToUpdate[0].setCurrX_1(screensToUpdate[0].getCurrX_1() + xdiff);
+						screensToUpdate[0].setCurrX_2(screensToUpdate[0].getCurrX_2() + xdiff);
+						screensToUpdate[0].repaintPixel();
+
+						break;
+				}
+				break;
+			case "goLeft":
+				switch (behaviour){
+					case SWARM_LEADER:
+						screensToUpdate[0].setCurrIRdim(screensToUpdate[0].getCurrIRdim() - dimdiff);
+						screensToUpdate[0].repaintPixel();
+
+						screensToUpdate[1].setCurrX_1(screensToUpdate[1].getCurrX_1() - xdiff);
+						screensToUpdate[1].setCurrX_2(screensToUpdate[1].getCurrX_2() - xdiff);
+						screensToUpdate[1].repaintPixel();
+
+						break;
+					case FOLLOW_LEFT:
+						screensToUpdate[0].setCurrX_1(screensToUpdate[0].getCurrX_1() - xdiff);
+						screensToUpdate[0].setCurrX_2(screensToUpdate[0].getCurrX_2() - xdiff);
+						screensToUpdate[0].repaintPixel();
+
+						break;
+				}
+				break;
+			case "goBack":
+				switch (behaviour) {
+					case SWARM_LEADER:
+						screensToUpdate[1].setCurrIRdim(screensToUpdate[1].getCurrIRdim() + dimdiff);
+						screensToUpdate[1].repaintPixel();
+						break;
+
+					case FOLLOW_FRONT:
+						screensToUpdate[0].setCurrIRdim(screensToUpdate[0].getCurrIRdim() + dimdiff);
+						screensToUpdate[0].repaintPixel();
+						break;
+				}
+
+				break;
+			case "stop":
+				break;
 		}
 	}
 
-	private class RebelAgentDailyCycle implements AgentDailyCycle {
-
-		@Override
-		public void dailyCycle() {
-			System.out.println("Rebel agent in action");
-			changeDirectionRandomly();
+	private void followIR(String findIR) {
+		if(findIR.equals("front")){
 			goAhead();
+			setCommand("goAhed");
+		}else if(findIR.equals("right")){
+			goToSide("right");
+			setCommand("goRight");
+		}else if(findIR.equals("left")) {
+			goToSide("left");
+			setCommand("goLeft");
+		}else if(findIR.equals("back")){
+			goBack();
+			setCommand("goBack");
+		}else{
+			setCommand("stop");
 		}
 
+	}
+
+
+	private void updateSelfScreen(AgentPaintedPanel memberPanel) {
+		if(command.equals("goAhed")){
+			switch (behaviour) {
+				case FOLLOW_LEFT:
+					memberPanel.setCurrX_1(memberPanel.getCurrX_1() - memberPanel.getDiffX());
+					memberPanel.setCurrX_2(memberPanel.getCurrX_2() - memberPanel.getDiffX());
+					memberPanel.repaintPixel();
+
+					break;
+				case FOLLOW_FRONT:
+					memberPanel.setCurrIRdim(memberPanel.getCurrIRdim() + memberPanel.getDiffDim());
+					memberPanel.repaintPixel();
+
+					break;
+				case LAST:
+					memberPanel.setCurrIRdim(memberPanel.getCurrIRdim() + memberPanel.getDiffDim());
+					memberPanel.repaintPixel();
+
+					break;
+			}
+		}else if(command.equals("goLeft")){
+			switch (behaviour) {
+				case FOLLOW_LEFT:
+					memberPanel.setCurrIRdim(memberPanel.getCurrIRdim() + memberPanel.getDiffDim());
+					memberPanel.repaintPixel();
+
+					break;
+				case FOLLOW_FRONT:
+					memberPanel.setCurrX_1(memberPanel.getCurrX_1() + memberPanel.getDiffX());
+					memberPanel.setCurrX_2(memberPanel.getCurrX_2() + memberPanel.getDiffX());
+					memberPanel.repaintPixel();
+
+					break;
+				case LAST:
+					memberPanel.setCurrX_1(memberPanel.getCurrX_1() + memberPanel.getDiffX());
+					memberPanel.setCurrX_2(memberPanel.getCurrX_2() + memberPanel.getDiffX());
+					memberPanel.repaintPixel();
+
+					break;
+			}
+		}else if(command.equals("goRight")){
+			switch (behaviour) {
+				case FOLLOW_LEFT:
+					memberPanel.setCurrIRdim(memberPanel.getCurrIRdim() - memberPanel.getDiffDim());
+					memberPanel.repaintPixel();
+
+					break;
+				case FOLLOW_FRONT:
+					memberPanel.setCurrX_1(memberPanel.getCurrX_1() - memberPanel.getDiffX());
+					memberPanel.setCurrX_2(memberPanel.getCurrX_2() - memberPanel.getDiffX());
+					memberPanel.repaintPixel();
+
+					break;
+				case LAST:
+					memberPanel.setCurrX_1(memberPanel.getCurrX_1() - memberPanel.getDiffX());
+					memberPanel.setCurrX_2(memberPanel.getCurrX_2() - memberPanel.getDiffX());
+					memberPanel.repaintPixel();
+
+					break;
+			}
+		}
 	}
 }

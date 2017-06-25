@@ -10,7 +10,6 @@ import java.util.Random;
 import javax.swing.JComponent;
 
 import simulation.Agent;
-import simulation.Agent.AgentBehaviour;
 
 @SuppressWarnings("serial")
 class AgentComponent extends JComponent {
@@ -21,7 +20,7 @@ class AgentComponent extends JComponent {
 	private Polygon shape;
 	private int shapeWidth = 10;
 	private Color agentColor;
-	private AgentBehaviour currentBehaviour;
+	private Agent.AgentSwarmBehaviour currentBehaviour;
 	private int[] lastLocation;
 
 	AgentComponent(Agent agent) {
@@ -37,10 +36,10 @@ class AgentComponent extends JComponent {
 
 	private void decideAgentColor() {
 		switch (agent.getAgentBehaviour()) {
-			case MIXED: this.agentColor = Color.GREEN; break;
-			case NORMAL: this.agentColor =  Color.BLACK; break;//giveMeAColor(); break;
-			case REBEL: this.agentColor = Color.RED; break;
 			case SWARM_LEADER: this.agentColor = Color.RED; break;
+			case FOLLOW_LEFT: this.agentColor =  Color.BLACK; break;
+			case FOLLOW_FRONT: this.agentColor = Color.BLACK; break;
+			case LAST: this.agentColor = Color.BLACK; break;
 		}
 	}
 

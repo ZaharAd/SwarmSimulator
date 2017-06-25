@@ -13,7 +13,7 @@ import java.util.Set;
 
 import javax.swing.SwingUtilities;
 
-import simulation.Agent.AgentBehaviour;
+import simulation.Agent.AgentSwarmBehaviour;
 import simulation.util.Vector2D;
 
 public class Simulator  implements Runnable {
@@ -86,7 +86,7 @@ public class Simulator  implements Runnable {
 		// * -
 		// - -
 		agents[i++] = grid[startPoint.getX()][startPoint.getY()] = new Agent(
-				AgentBehaviour.SWARM_LEADER,
+				Agent.AgentSwarmBehaviour.SWARM_LEADER,
 				startDir,
 				startPoint.getX(),
 				startPoint.getY()
@@ -95,8 +95,8 @@ public class Simulator  implements Runnable {
 		// - *
 		// - -
 		agents[i++] = grid[startPoint.getX() + 4][startPoint.getY()] = new Agent(
-				AgentBehaviour.FOLLOW_LEFT,
-//				AgentBehaviour.NORMAL,
+				AgentSwarmBehaviour.FOLLOW_LEFT,
+//				AgentSwarmBehaviour.NORMAL,
 				startDir,
 				startPoint.getX() + 4,
 				startPoint.getY()
@@ -106,15 +106,16 @@ public class Simulator  implements Runnable {
 		// - -
 		// * -
 		agents[i++] = grid[startPoint.getX()][startPoint.getY() - 4] = new Agent(
-				AgentBehaviour.FOLLOW_FRONT,
+				Agent.AgentSwarmBehaviour.FOLLOW_FRONT,
 				startDir,
 				startPoint.getX(),
 				startPoint.getY() + 4
+//				true // Is Rabel Agent
 		);
 		// - -
 		// - *
 		agents[i++] = grid[startPoint.getX() + 4][startPoint.getY() -4] = new Agent(
-				AgentBehaviour.LAST,
+				Agent.AgentSwarmBehaviour.LAST,
 				startDir,
 				startPoint.getX() + 4,
 				startPoint.getY()  + 4
@@ -166,12 +167,8 @@ public class Simulator  implements Runnable {
 				tmpPos.x = agent.x;
 				tmpPos.y = agent.y;
 
-
-
 				if(panel != null && panel.getScreens() != null && panel.getScreens().getAgentPanelsArr() != null) {
-					agent.dailyCycle();
-					if (!agent.getCommand().equals(""))
-						panel.updateScreens(agent.getCommand(), agent.getAgentBehaviour());
+					agent.dailyCycle();// read from screens / byPress for the leader
 				}
 
 				if (!agent.getPos().equals(tmpPos)) ensureAgentInValidPos(tmpPos, agent);
