@@ -16,7 +16,7 @@ import javax.swing.SwingUtilities;
 import simulation.Agent.AgentSwarmBehaviour;
 import simulation.util.Vector2D;
 
-public class Simulator  implements Runnable {
+public class Simulator implements Runnable {
 
 
 	public static void main(String[] args) {
@@ -34,9 +34,6 @@ public class Simulator  implements Runnable {
 	public static final int MAX_X = 100;
 	public static final int MAX_Y = 100;
 	public static final int N_OF_AGENTS = 4;
-	public static final double P_OF_REBEL = 0.1;
-
-	public static final double P_OF_MIXED = 0.2;
 
 	private SwarmPanel panel;
 
@@ -52,23 +49,6 @@ public class Simulator  implements Runnable {
 	private Agent[] agents = new Agent[N_OF_AGENTS];
 
 	private Simulator() {}
-
-	/*private Set<Point> populateLocations() {
-		Set<Point> locations = new HashSet<Point>(N_OF_AGENTS);
-
-		for (int i = 0; i < N_OF_AGENTS; i++) {
-			while (!locations.add(getRandomPoint()));
-		}
-		return locations;
-
-	}*/
-
-	/*private Point getRandomPoint() {
-		int x = randomGenerator.nextInt(MAX_X);
-		int y = randomGenerator.nextInt(MAX_Y);
-		return new Point(x,y);
-//		return new Point(MAX_X/2, MAX_Y/2);
-	}*/
 
 	public static Simulator getInstance() {
 		if (grid == null) sim.init();
@@ -110,7 +90,6 @@ public class Simulator  implements Runnable {
 				startDir,
 				startPoint.getX(),
 				startPoint.getY() + 4
-//				true // Is Rabel Agent
 		);
 		// - -
 		// - *
@@ -161,6 +140,11 @@ public class Simulator  implements Runnable {
 //		printGrid();
 
 		Vector2D tmpPos = new Vector2D();
+
+		boolean[] respond = new boolean[3];
+		for (int i = 0; i < respond.length; i++) {
+			respond[i] = false;
+		}
 
 		while (today.before(LAST_DAY)) {
 			for (Agent agent : agents) {

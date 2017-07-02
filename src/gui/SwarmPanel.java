@@ -21,7 +21,7 @@ public class SwarmPanel extends JPanel implements KeyListener {
 	private static final long serialVersionUID = -8787570229900908897L;
 
 	private AgentComponent[] components;
-	private FollowScreensPanel screens;
+	private FollowScreensPanel screens = FollowScreensPanel.getInstance();
 	private boolean running = false;
 
 	public static final int SCALE = 7;
@@ -57,7 +57,7 @@ public class SwarmPanel extends JPanel implements KeyListener {
 		messageLabel.setText("SWARM simulation");
 		add(messageLabel);
 
-		screens = new FollowScreensPanel();
+//		screens = new FollowScreensPanel();
 
 		final JFrame frame = new JFrame();
 		frame.add(screens);
@@ -170,7 +170,7 @@ public class SwarmPanel extends JPanel implements KeyListener {
 			leaderDirection.setText("\nDown key pressed");
 		}
 
-		leaderPanel.add(leaderDirection);
+		leaderPanel.add(leaderDirection);// TODO arrows
 	}
 
 	@Override
@@ -188,6 +188,7 @@ public class SwarmPanel extends JPanel implements KeyListener {
 		if (e.getKeyCode() == KeyEvent.VK_S) {
 			leaderDirection.setText("\n" + hight + " meters");
 		}
+
 		new Timer().schedule(new TimerTask() {
 			@Override
 			public void run() {

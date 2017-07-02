@@ -4,6 +4,8 @@ import simulation.Simulator;
 
 import javax.swing.*;
 import java.awt.*;
+import java.awt.geom.Rectangle2D;
+import java.awt.image.BufferedImage;
 
 import static gui.SwarmPanel.SCALE;
 
@@ -13,16 +15,22 @@ import static gui.SwarmPanel.SCALE;
 public class FollowScreensPanel extends JPanel {
 
     private JPanel LeaderPanel;
-    private AgentPaintedPanel SecondPanel;
-    private AgentPaintedPanel BehindLeaderPanel;
-    private AgentPaintedPanel LastPanel;
+    private AgentScreen SecondPanel;
+    private AgentScreen BehindLeaderPanel;
+    private AgentScreen LastPanel;
 
-    private AgentPaintedPanel[] members;
+    private static AgentScreen[] members;
     private Dimension leaderLocation;//, secondLocation, behindeLocation, lastLocation;
 
-    public FollowScreensPanel() {
-        leaderLocation = new Dimension(Simulator.MAX_X*SCALE +10, 0);
+    private static final FollowScreensPanel screens = new FollowScreensPanel();
 
+    public static FollowScreensPanel getInstance() {
+        if(members == null) screens.init();
+        return screens;
+    }
+
+    private void init() {
+        leaderLocation = new Dimension(Simulator.MAX_X*SCALE +10, 0);
 
         final Dimension size = new Dimension(600, Simulator.MAX_Y*SCALE);
 
@@ -33,39 +41,92 @@ public class FollowScreensPanel extends JPanel {
         setBackground(Color.black);
 
         LeaderPanel = new JPanel();
-        SecondPanel = new AgentPaintedPanel();
-        BehindLeaderPanel = new AgentPaintedPanel();
-        LastPanel = new AgentPaintedPanel();
 
-        members =new AgentPaintedPanel[] {SecondPanel, BehindLeaderPanel, LastPanel};
-
-        LeaderPanel.setBackground(Color.yellow);
-        SecondPanel.setBackground(Color.black);
+        SecondPanel = new AgentScreen();
         SecondPanel.setCameraSide("left");
-        BehindLeaderPanel.setBackground(Color.black);
-        BehindLeaderPanel.setCameraSide("front");
-        LastPanel.setBackground(Color.black);
-        LastPanel.setCameraSide("front");
+
+        BehindLeaderPanel = new AgentScreen();
+        BehindLeaderPanel.setCameraSide("frontL");
+
+        LastPanel = new AgentScreen();
+        LastPanel.setCameraSide("frontS");
+
+        members = new AgentScreen[] {SecondPanel, BehindLeaderPanel, LastPanel};
 //
-//        JLabel direction = new JLabel();
-//        direction.setLocation((int)leaderLocation.getWidth() + 20,(int)leaderLocation.getHeight() + 20);
-//        direction.setSize(500, 50);
-//        direction.setText("SWARM simulation");
-//        LastPanel.add(direction);
+////        paintComponent();
+//
+//        LeaderPanel.setBackground(Color.yellow);
+//        LeaderPanel.setLocation(0,0);
+//        LeaderPanel.setSize(20,20);
+////        setBounds(0,0,20,20);
+//        add(LeaderPanel);
 
+//        SecondPanel.setBackground(Color.black);
+//        SecondPanel.setCameraSide("left");
+//        BehindLeaderPanel.setBackground(Color.black);
+//        BehindLeaderPanel.setCameraSide("front");
+//        LastPanel.setBackground(Color.black);
+//        LastPanel.setCameraSide("front");
+////
+        JLabel direction = new JLabel();
+        direction.setLocation((int)leaderLocation.getWidth() + 20,(int)leaderLocation.getHeight() + 20);
+        direction.setSize(500, 50);
+        direction.setText("SWARM simulation");
 
-
-        JSplitPane firstRow = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT , LeaderPanel, SecondPanel);
-        firstRow.setDividerLocation(300);
-        JSplitPane secRow = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT , BehindLeaderPanel, LastPanel);
-        secRow.setDividerLocation(300);
-
-        JSplitPane pane = new JSplitPane(JSplitPane.VERTICAL_SPLIT,firstRow, secRow);
-        pane.setDividerLocation(Simulator.MAX_Y*SCALE / 2);
-        add(pane);
+        //        LastPanel.add(direction);
+//
+//
+//
+//        JSplitPane firstRow = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT , LeaderPanel, SecondPanel);
+//        firstRow.setDividerLocation(300);
+//        JSplitPane secRow = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT , BehindLeaderPanel, LastPanel);
+//        secRow.setDividerLocation(300);
+//
+//        JSplitPane pane = new JSplitPane(JSplitPane.VERTICAL_SPLIT,firstRow, secRow);
+//        pane.setDividerLocation(Simulator.MAX_Y*SCALE / 2);
+//        add(pane);
     }
 
-    public AgentPaintedPanel[] getAgentPanelsArr (){
+    @Override
+    public void paintComponent(Graphics g){
+        super.paintComponent(g);
+
+        Graphics2D g2 = (Graphics2D) g;
+
+        members[0].draw(g2,300,0);
+        members[1].draw(g2,0,365);
+        members[2].draw(g2,300,365);
+
+    }
+
+    public void repaintPoints(){
+        repaint();
+    }
+
+    public String findIRpoint(String side) {
+        BufferedImage img = new BufferedImage(600, 720, BufferedImage.TYPE_INT_RGB);
+        Graphics2D g2 = img.createGraphics();
+        this.paint(g2);
+
+        String ans = "";
+
+        if(side.equals("left")){
+            ans = members[0].firstRowReading(img);
+        }else if(side.equals("frontL")){
+            ans = members[1].secRowReading(img,0,365);
+        }else if(side.equals("frontS")){
+            ans = members[2].secRowReading(img,300,365);
+        }
+
+        g2.dispose();
+        return ans;
+    }
+
+    public FollowScreensPanel() {
+
+    }
+
+    public AgentScreen[] getAgentPanelsArr (){
         return members;
     }
 
@@ -77,7 +138,6 @@ public class FollowScreensPanel extends JPanel {
         this.leaderLocation = leaderLocation;
     }
 
-
     public JPanel getLeaderPanel() {
         return LeaderPanel;
     }
@@ -86,27 +146,27 @@ public class FollowScreensPanel extends JPanel {
         LeaderPanel = leaderPanel;
     }
 
-    public AgentPaintedPanel getSecondPanel() {
+    public AgentScreen getSecondPanel() {
         return SecondPanel;
     }
 
-    public void setSecondPanel(AgentPaintedPanel secondPanel) {
+    public void setSecondPanel(AgentScreen secondPanel) {
         SecondPanel = secondPanel;
     }
 
-    public AgentPaintedPanel getBehindLeaderPanel() {
+    public AgentScreen getBehindLeaderPanel() {
         return BehindLeaderPanel;
     }
 
-    public void setBehindLeaderPanel(AgentPaintedPanel behindLeaderPanel) {
+    public void setBehindLeaderPanel(AgentScreen behindLeaderPanel) {
         BehindLeaderPanel = behindLeaderPanel;
     }
 
-    public AgentPaintedPanel getLastPanel() {
+    public AgentScreen getLastPanel() {
         return LastPanel;
     }
 
-    public void setLastPanel(AgentPaintedPanel lastPanel) {
+    public void setLastPanel(AgentScreen lastPanel) {
         LastPanel = lastPanel;
     }
 }
