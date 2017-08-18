@@ -1,7 +1,7 @@
 package simulation;
 
 import gui.AgentScreen;
-import gui.FollowScreensPanel;
+import gui.ScreensPanel;
 import gui.SwarmPanel;
 
 import simulation.util.Vector2D;
@@ -10,6 +10,8 @@ public class Agent {
 
 
 	public enum AgentSwarmBehaviour { SWARM_LEADER , FOLLOW_LEFT, FOLLOW_FRONT , LAST }
+	public enum AgentControl { PitchForward , PitchBackward , RollLeft , RollRight ,
+		ThrottleHigh , ThrottleLow , YawLeft , TawRight , Hover}
 
 	private static final int INERTIA = 3;
 	private static final int REACH = 20;
@@ -18,7 +20,8 @@ public class Agent {
 	double y;
 	private Direction direction;
 	private AgentSwarmBehaviour behaviour;
-	private String command ="";
+//	private String command ="";
+	private AgentControl command;
 	private double xDiff;
 	private double yDiff;
 
@@ -29,13 +32,14 @@ public class Agent {
 
 
 //	private static Simulator sim = Simulator.getInstance();
-	private static FollowScreensPanel screensPanel = FollowScreensPanel.getInstance();
+	private static ScreensPanel screensPanel = ScreensPanel.getInstance();
 
 	public Agent(AgentSwarmBehaviour behaviour, Direction direction, int x, int y) {
 		this.behaviour = behaviour;
 		this.x = x;
 		this.y = y;
 		this.direction = direction;
+		this.command = AgentControl.Hover;
 
 	}
 
@@ -69,7 +73,7 @@ public class Agent {
 		y += yDiff;
 	}
 
-	private void goToSide(String side) {
+	private void rollTo(String side) {
 		double angle;
 		if(side.equals("left")){
 			angle = Math.toRadians(direction.getAngle() - 90);
@@ -85,51 +89,51 @@ public class Agent {
 	}
 
 
-	private void steerTowards(Vector2D position, double willingness) {
-		if (position.x > x) {
-			x += willingness;
-		} else {
-			x -= willingness;
-		}
-		if (position.y > y) {
-			y += willingness;
-		} else {
-			y -= willingness;
-		}
-		if (position.distance(x, y) < AGENT_SIZE) {
-			moveAwayFrom(position);// TODO use in the rabel
-		}
-	}
+//	private void steerTowards(Vector2D position, double willingness) {
+//		if (position.x > x) {
+//			x += willingness;
+//		} else {
+//			x -= willingness;
+//		}
+//		if (position.y > y) {
+//			y += willingness;
+//		} else {
+//			y -= willingness;
+//		}
+//		if (position.distance(x, y) < AGENT_SIZE) {
+//			moveAwayFrom(position);// TODO use in the rabel
+//		}
+//	}
+//
+//	private void moveAwayFrom(Vector2D position) {
+//		double step = AGENT_SIZE/INERTIA;
+//		x = position.x > x ? x - step : x + step;
+//		y = position.y > y ? y - step : y + step;
+//	}
 
-	private void moveAwayFrom(Vector2D position) {
-		double step = AGENT_SIZE/INERTIA;
-		x = position.x > x ? x - step : x + step;
-		y = position.y > y ? y - step : y + step;
-	}
-
-	private void changeDirectionRandomly() {
-		double random = Math.random();
-		if (random < 0.01) {
-			direction.turn(Simulator.randomGenerator.nextInt(180) - 90);
-		}
-	}
-
-	private void headInTheSameDirection(int avgDirection, double willingness) {
-		System.out.println("Was heading " + direction.getAngle() + " but avgDirection is " + avgDirection);
-		System.out.println("Will: " + willingness);
-		int diffAngle = avgDirection - direction.getAngle();
-		direction.turn((int)(diffAngle*willingness));
-		System.out.println("Heading in angle " + direction.getAngle());
-	}
-
-	private void headSomewhere() {
-		double random = Math.random();
-		if (random > 0.95) {
-			direction.turn(1);
-		} else if (random > 0.9) {
-			direction.turn(-1);
-		}
-	}
+//	private void changeDirectionRandomly() {
+//		double random = Math.random();
+//		if (random < 0.01) {
+//			direction.turn(Simulator.randomGenerator.nextInt(180) - 90);
+//		}
+//	}
+//
+//	private void headInTheSameDirection(int avgDirection, double willingness) {
+//		System.out.println("Was heading " + direction.getAngle() + " but avgDirection is " + avgDirection);
+//		System.out.println("Will: " + willingness);
+//		int diffAngle = avgDirection - direction.getAngle();
+//		direction.turn((int)(diffAngle*willingness));
+//		System.out.println("Heading in angle " + direction.getAngle());
+//	}
+//
+//	private void headSomewhere() {
+//		double random = Math.random();
+//		if (random > 0.95) {
+//			direction.turn(1);
+//		} else if (random > 0.9) {
+//			direction.turn(-1);
+//		}
+//	}
 
 	public Vector2D getPos() {
 		return new Vector2D(x, y);
@@ -157,10 +161,11 @@ public class Agent {
 	}
 
 	public String toString() {
-		return "X=" + x + " Y=" + y + " D=" + direction;
+		return "X=" + x + " Y=" + y + " D=" + direction.getAngle() +
+				" , behaviour= " + behaviour + ", command=" + command;
 	}
 
-	public void setCommand(String command) {
+	public void setCommand(AgentControl command) {
 		this.command = command;
 	}
 
@@ -173,34 +178,40 @@ public class Agent {
 		@Override
 		public void dailyCycle() {
 			AgentScreen[] screensToUpdate = new AgentScreen[]{screensPanel.getAgentPanelsArr()[0] ,
-					screensPanel.getAgentPanelsArr()[1]};
+					/*screensPanel.getAgentPanelsArr()[1]*/};
 
-			if(command.equals("goAhed")){
+//			System.out.println(command);
+			if(command.equals(AgentControl.PitchForward)){
 				goAhead();
-			}else if(command.equals("goRight")){
-				goToSide("right");
-			}else if(command.equals("goLeft")){
-				goToSide("left");
+				System.out.println("still go ahed");
+			}else if(command.equals(AgentControl.RollRight)){
+				rollTo("right");
+			}else if(command.equals(AgentControl.RollLeft)){
+				rollTo("left");
+			}else if(command.equals(AgentControl.Hover)){
 			}
-			System.out.println(behaviour + ", command:" + command + "\n");
+//			System.out.println(behaviour + ", command:" + command);
 			updateFollowers(screensToUpdate, command);
 
 		}
+
 	}
 
 	public class followFromLeftCycle implements AgentDailyCycle {
 
 		@Override
 		public void dailyCycle() {
+//
+//			AgentScreen secMemberPanel = screensPanel.getAgentPanelsArr()[0];
+//			AgentScreen[] screensToUpdate = new AgentScreen[]{screensPanel.getAgentPanelsArr()[2]};
+//
+//			String IRpos = screensPanel.findIRpos(secMemberPanel.getCameraSide());
+////			System.out.println(behaviour + ", find:" + IRpos+ "\n");
+//			followIRpoints(IRpos);
+//			updateSelfScreen(secMemberPanel);
+//			updateFollowers(screensToUpdate,command);
+//			System.out.println(behaviour + ", command:" + command + "\n");
 
-			AgentScreen secMemberPanel = screensPanel.getAgentPanelsArr()[0];
-			AgentScreen[] screensToUpdate = new AgentScreen[]{screensPanel.getAgentPanelsArr()[2]};
-
-			String findIRpoints = screensPanel.findIRpoint(secMemberPanel.getCameraSide());
-			System.out.println(behaviour + ", find:" + findIRpoints+ "\n");
-			followIR(findIRpoints);
-			updateSelfScreen(secMemberPanel);
-			updateFollowers(screensToUpdate,command);
 		}
 	}
 
@@ -210,13 +221,16 @@ public class Agent {
 
 		@Override
 		public void dailyCycle() {
-			AgentScreen secRowsPanel = screensPanel.getAgentPanelsArr()[1];
+//			AgentScreen secRowsPanel = screensPanel.getAgentPanelsArr()[1];
+			AgentScreen secRowsPanel = screensPanel.getAgentPanelsArr()[0];
 
-			String findIR = screensPanel.findIRpoint(secRowsPanel.getCameraSide());
-			System.out.println(behaviour + ", find:" + findIR+ "\n");
+			String findIR = screensPanel.findIRpos(secRowsPanel.getCameraSide());
+//			System.out.println(behaviour + ", find:" + findIR+ "\n");
 
-			followIR(findIR);
+			followIRpoints(findIR);
 			updateSelfScreen(secRowsPanel);
+//			System.out.println(behaviour + ", command:" + command);
+
 		}
 	}
 
@@ -224,29 +238,31 @@ public class Agent {
 
 		@Override
 		public void dailyCycle() {
-			AgentScreen secRowsPanel = screensPanel.getAgentPanelsArr()[2];
-
-			String findIR = screensPanel.findIRpoint(secRowsPanel.getCameraSide());
-			System.out.println(behaviour + ", find:" + findIR+ "\n");
-
-			followIR(findIR);
-			updateSelfScreen(secRowsPanel);
+//			AgentScreen secRowsPanel = screensPanel.getAgentPanelsArr()[2];
+//
+//			String findIR = screensPanel.findIRpos(secRowsPanel.getCameraSide());
+////			System.out.println(behaviour + ", find:" + findIR+ "\n");
+//			System.out.println(behaviour + ", command:" + command + "\n");
+//
+//			followIRpoints(findIR);
+//			updateSelfScreen(secRowsPanel);
 		}
 	}
 
-	private void updateFollowers(AgentScreen[] screensToUpdate, String command) {
+	private void updateFollowers(AgentScreen[] screensToUpdate, AgentControl command) {
 		int xdiff = screensToUpdate[0].getDiffX();
 		int dimdiff = screensToUpdate[0].getDiffDim();
 		switch (command) {
-			case "goAhed":
+			case PitchForward:
 				switch (behaviour){
 					case SWARM_LEADER:
-						screensToUpdate[0].setCurrX_1(screensToUpdate[0].getCurrX_1() + xdiff);
-						screensToUpdate[0].setCurrX_2(screensToUpdate[0].getCurrX_2() + xdiff);
+//						screensToUpdate[0].setCurrX_1(screensToUpdate[0].getCurrX_1() + xdiff);
+//						screensToUpdate[0].setCurrX_2(screensToUpdate[0].getCurrX_2() + xdiff);
+//
+//						screensToUpdate[1].setCurrIRdim(screensToUpdate[1].getCurrIRdim() - dimdiff);
+						screensToUpdate[0].setCurrIRdim(screensToUpdate[0].getCurrIRdim() - dimdiff);
 
-						screensToUpdate[1].setCurrIRdim(screensToUpdate[1].getCurrIRdim() - dimdiff);
-
-						System.out.println("getCurrIRdim():" + screensToUpdate[1].getCurrIRdim());
+//						System.out.println("getCurrIRdim():" + screensToUpdate[1].getCurrIRdim());
 						break;
 					case FOLLOW_LEFT:
 						screensToUpdate[0].setCurrIRdim(screensToUpdate[0].getCurrIRdim() - dimdiff);
@@ -254,7 +270,7 @@ public class Agent {
 						break;
 				}
 				break;
-			case "goRight":
+			case RollRight:
 				switch (behaviour){
 					case SWARM_LEADER:
 						screensToUpdate[0].setCurrIRdim(screensToUpdate[0].getCurrIRdim() + dimdiff);
@@ -271,7 +287,7 @@ public class Agent {
 						break;
 				}
 				break;
-			case "goLeft":
+			case RollLeft:
 				switch (behaviour){
 					case SWARM_LEADER:
 						screensToUpdate[0].setCurrIRdim(screensToUpdate[0].getCurrIRdim() - dimdiff);
@@ -287,7 +303,7 @@ public class Agent {
 						break;
 				}
 				break;
-			case "goBack":
+			case PitchBackward:
 				switch (behaviour) {
 					case SWARM_LEADER:
 						screensToUpdate[1].setCurrIRdim(screensToUpdate[1].getCurrIRdim() + dimdiff);
@@ -299,7 +315,7 @@ public class Agent {
 				}
 
 				break;
-			case "stop":
+			case Hover:
 				break;
 		}
 
@@ -307,27 +323,27 @@ public class Agent {
 
 	}
 
-	private void followIR(String findIR) {
+	private void followIRpoints(String findIR) {
 		if(findIR.equals("front")){
 			goAhead();
-			setCommand("goAhed");
+			setCommand(AgentControl.PitchForward);
 		}else if(findIR.equals("right")){
-			goToSide("right");
-			setCommand("goRight");
+			rollTo("right");
+			setCommand(AgentControl.RollRight);
 		}else if(findIR.equals("left")) {
-			goToSide("left");
-			setCommand("goLeft");
+			rollTo("left");
+			setCommand(AgentControl.RollLeft);
 		}else if(findIR.equals("back")){
 			goBack();
-			setCommand("goBack");
+			setCommand(AgentControl.PitchBackward);
 		}else{
-			setCommand("stop");
+			setCommand(AgentControl.Hover);
 		}
 
 	}
 
 	private void updateSelfScreen(AgentScreen memberPanel) {
-		if(command.equals("goAhed")){
+		if(command.equals(AgentControl.PitchForward)){
 			switch (behaviour) {
 				case FOLLOW_LEFT:
 					memberPanel.setCurrX_1(memberPanel.getX_1());
@@ -343,7 +359,7 @@ public class Agent {
 
 					break;
 			}
-		}else if(command.equals("goLeft") || command.equals("goRight")){
+		}else if(command.equals(AgentControl.RollLeft) || command.equals(AgentControl.RollRight)){
 			switch (behaviour) {
 				case FOLLOW_LEFT:
 					memberPanel.setCurrIRdim(memberPanel.getIRdim());

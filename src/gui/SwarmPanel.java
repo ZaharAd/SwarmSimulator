@@ -21,7 +21,7 @@ public class SwarmPanel extends JPanel implements KeyListener {
 	private static final long serialVersionUID = -8787570229900908897L;
 
 	private AgentComponent[] components;
-	private FollowScreensPanel screens = FollowScreensPanel.getInstance();
+	private ScreensPanel screens = ScreensPanel.getInstance();
 	private boolean running = false;
 
 	public static final int SCALE = 7;
@@ -32,7 +32,6 @@ public class SwarmPanel extends JPanel implements KeyListener {
 	private int angle ;
 	private double hight;
 	private boolean isTurn = false;
-	private int rabelError = 0;
 
 	public void stop() {
 		running = false;
@@ -57,7 +56,7 @@ public class SwarmPanel extends JPanel implements KeyListener {
 		messageLabel.setText("SWARM simulation");
 		add(messageLabel);
 
-//		screens = new FollowScreensPanel();
+//		screens = new ScreensPanel();
 
 		final JFrame frame = new JFrame();
 		frame.add(screens);
@@ -76,11 +75,11 @@ public class SwarmPanel extends JPanel implements KeyListener {
 			add(components[i]);
 		}
 
-
 		leaderPanel = screens.getLeaderPanel();
 		leaderDirection = new JLabel();;
 		Dimension screenLocation = screens.getLeaderLocation();
 		leaderDirection.setLocation((int)screenLocation.getWidth()+300,(int)screenLocation.getHeight()+450);
+//		leaderDirection.set
 		leaderDirection.setSize(100, 50);
 
 
@@ -119,7 +118,7 @@ public class SwarmPanel extends JPanel implements KeyListener {
 		}, 2000);
 	}
 
-	public FollowScreensPanel getScreens() {
+	public ScreensPanel getScreens() {
 		return screens;
 	}
 
@@ -134,30 +133,30 @@ public class SwarmPanel extends JPanel implements KeyListener {
 		Agent leaderAgent = components[0].getAgent();
 
 		if (e.getKeyCode() == KeyEvent.VK_UP) {
-			leaderAgent.setCommand("goAhed");
+			leaderAgent.setCommand(Agent.AgentControl.PitchForward);
 			leaderDirection.setText("\nFront key pressed");
 		}
 		if (e.getKeyCode() == KeyEvent.VK_DOWN) {
-			leaderAgent.setCommand("stop");
-			leaderDirection.setText("\nStop key pressed");
+			leaderAgent.setCommand(Agent.AgentControl.PitchBackward);
+			leaderDirection.setText("\nBack key pressed");
 		}
 		if (e.getKeyCode() == KeyEvent.VK_RIGHT) {
-			leaderAgent.setCommand("goRight");
+			leaderAgent.setCommand(Agent.AgentControl.RollRight);
 			leaderDirection.setText("\nRight key pressed");
 		}
 		if (e.getKeyCode() == KeyEvent.VK_LEFT) {
-			leaderAgent.setCommand("goLeft");
+			leaderAgent.setCommand(Agent.AgentControl.RollLeft);
 			leaderDirection.setText("\nLeft key pressed");
 		}
 		if (e.getKeyCode() == KeyEvent.VK_D) {;
 			isTurn = true;
-			angle ++;
+//			angle ++;
 			leaderAgent.getDirection().turn(1);
 			leaderDirection.setText("\nClockwise");
 		}
 		if (e.getKeyCode() == KeyEvent.VK_A) {
 			isTurn = true;
-			angle++;
+//			angle++;
 			leaderAgent.getDirection().turn(-1);
 			leaderDirection.setText("\nCounterClockwise");
 		}

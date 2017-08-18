@@ -4,7 +4,6 @@ import simulation.Simulator;
 
 import javax.swing.*;
 import java.awt.*;
-import java.awt.geom.Rectangle2D;
 import java.awt.image.BufferedImage;
 
 import static gui.SwarmPanel.SCALE;
@@ -12,7 +11,7 @@ import static gui.SwarmPanel.SCALE;
 /**
  * Created by zahar on 16/06/17.
  */
-public class FollowScreensPanel extends JPanel {
+public class ScreensPanel extends JPanel {
 
     private JPanel LeaderPanel;
     private AgentScreen SecondPanel;
@@ -22,9 +21,9 @@ public class FollowScreensPanel extends JPanel {
     private static AgentScreen[] members;
     private Dimension leaderLocation;//, secondLocation, behindeLocation, lastLocation;
 
-    private static final FollowScreensPanel screens = new FollowScreensPanel();
+    private static final ScreensPanel screens = new ScreensPanel();
 
-    public static FollowScreensPanel getInstance() {
+    public static ScreensPanel getInstance() {
         if(members == null) screens.init();
         return screens;
     }
@@ -42,16 +41,16 @@ public class FollowScreensPanel extends JPanel {
 
         LeaderPanel = new JPanel();
 
-        SecondPanel = new AgentScreen();
-        SecondPanel.setCameraSide("left");
+//        SecondPanel = new AgentScreen();
+//        SecondPanel.setCameraSide("left");
 
         BehindLeaderPanel = new AgentScreen();
         BehindLeaderPanel.setCameraSide("frontL");
 
-        LastPanel = new AgentScreen();
-        LastPanel.setCameraSide("frontS");
+//        LastPanel = new AgentScreen();
+//        LastPanel.setCameraSide("frontS");
 
-        members = new AgentScreen[] {SecondPanel, BehindLeaderPanel, LastPanel};
+        members = new AgentScreen[] {BehindLeaderPanel};//{SecondPanel, BehindLeaderPanel, LastPanel};
 //
 ////        paintComponent();
 //
@@ -93,9 +92,10 @@ public class FollowScreensPanel extends JPanel {
 
         Graphics2D g2 = (Graphics2D) g;
 
-        members[0].draw(g2,300,0);
-        members[1].draw(g2,0,365);
-        members[2].draw(g2,300,365);
+        members[0].draw(g2,0 , 365);
+//        members[0].draw(g2,300,0);
+//        members[1].draw(g2,0,365);
+//        members[2].draw(g2,300,365);
 
     }
 
@@ -103,26 +103,30 @@ public class FollowScreensPanel extends JPanel {
         repaint();
     }
 
-    public String findIRpoint(String side) {
+    public String findIRpos(String cameraSide) {
         BufferedImage img = new BufferedImage(600, 720, BufferedImage.TYPE_INT_RGB);
         Graphics2D g2 = img.createGraphics();
         this.paint(g2);
 
-        String ans = "";
+        String ans = members[0].secRowReading(img,0,365);
 
-        if(side.equals("left")){
-            ans = members[0].firstRowReading(img);
-        }else if(side.equals("frontL")){
-            ans = members[1].secRowReading(img,0,365);
-        }else if(side.equals("frontS")){
-            ans = members[2].secRowReading(img,300,365);
-        }
+//        if(cameraSide.equals("left")){
+//            ans = members[0].firstRowReading(img);
+//        }else if(cameraSide.equals("frontL")){
+//            // *    *
+//            // +    *
+//            ans = members[1].secRowReading(img,0,365);
+//        }else if(cameraSide.equals("frontS")){
+//            // *    *
+//            // *    +
+//            ans = members[2].secRowReading(img,300,365);
+//        }
 
         g2.dispose();
         return ans;
     }
 
-    public FollowScreensPanel() {
+    public ScreensPanel() {
 
     }
 
@@ -170,4 +174,7 @@ public class FollowScreensPanel extends JPanel {
         LastPanel = lastPanel;
     }
 }
+
+
+
 

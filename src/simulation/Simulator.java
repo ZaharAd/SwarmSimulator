@@ -1,15 +1,9 @@
 package simulation;
 
-import gui.FollowScreensPanel;
+import gui.ScreensPanel;
 import gui.SwarmPanel;
 
-import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.GregorianCalendar;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Random;
-import java.util.Set;
+import java.util.*;
 
 import javax.swing.SwingUtilities;
 
@@ -33,7 +27,7 @@ public class Simulator implements Runnable {
 	public static final int TIME_STEP = 50;
 	public static final int MAX_X = 100;
 	public static final int MAX_Y = 100;
-	public static final int N_OF_AGENTS = 4;
+	public static final int N_OF_AGENTS = 2;
 
 	private SwarmPanel panel;
 
@@ -60,7 +54,7 @@ public class Simulator implements Runnable {
 		grid = new Agent[MAX_X][MAX_Y];
 		int i = 0;
 		Vector2D startPoint = new Vector2D(10, MAX_Y -20);
-		Direction startDir = new Direction(0.1);
+		Direction startDir = new Direction(0);
 
 		//leader
 		// * -
@@ -74,36 +68,36 @@ public class Simulator implements Runnable {
 		//leaders row
 		// - *
 		// - -
-		agents[i++] = grid[startPoint.getX() + 4][startPoint.getY()] = new Agent(
-				AgentSwarmBehaviour.FOLLOW_LEFT,
-//				AgentSwarmBehaviour.NORMAL,
-				startDir,
-				startPoint.getX() + 4,
-				startPoint.getY()
-		);
+//		agents[i++] = grid[startPoint.getX() + 10][startPoint.getY()] = new Agent(
+//				AgentSwarmBehaviour.FOLLOW_LEFT,
+////				AgentSwarmBehaviour.NORMAL,
+//				startDir,
+//				startPoint.getX() + 10,
+//				startPoint.getY()
+//		);
 
 		//behind leader
 		// - -
 		// * -
-		agents[i++] = grid[startPoint.getX()][startPoint.getY() - 4] = new Agent(
+		agents[i] = grid[startPoint.getX()][startPoint.getY() + 10] = new Agent(
 				Agent.AgentSwarmBehaviour.FOLLOW_FRONT,
 				startDir,
 				startPoint.getX(),
-				startPoint.getY() + 4
+				startPoint.getY() + 10
 		);
 		// - -
 		// - *
-		agents[i++] = grid[startPoint.getX() + 4][startPoint.getY() -4] = new Agent(
-				Agent.AgentSwarmBehaviour.LAST,
-				startDir,
-				startPoint.getX() + 4,
-				startPoint.getY()  + 4
-		);
+//		agents[i++] = grid[startPoint.getX() + 10][startPoint.getY() - 10] = new Agent(
+//				Agent.AgentSwarmBehaviour.LAST,
+//				startDir,
+//				startPoint.getX() + 10,
+//				startPoint.getY()  + 10
+//		);
 	}
-
-	private Direction getRandomDirection() {
-		return new Direction(Math.random());
-	}
+//
+//	private Direction getRandomDirection() {
+//		return new Direction(Math.random());
+//	}
 
 	public List<Agent> getNeighbours(Agent requester, int distance) {
 		List<Agent> neighbours = new ArrayList<Agent>();
@@ -147,6 +141,12 @@ public class Simulator implements Runnable {
 		}
 
 		while (today.before(LAST_DAY)) {
+			System.out.println();
+			for (int i = 0; i < grid.length; i++) {
+				for (int j = 0; j < grid[i].length; j++) {
+					if(grid[i][j] != null) System.out.println("i:" + i +", j:" +j + ": (" + grid[i][j]+")");
+				}
+			}
 			for (Agent agent : agents) {
 				tmpPos.x = agent.x;
 				tmpPos.y = agent.y;
@@ -155,8 +155,11 @@ public class Simulator implements Runnable {
 					agent.dailyCycle();// read from screens / byPress for the leader
 				}
 
+
 				if (!agent.getPos().equals(tmpPos)) ensureAgentInValidPos(tmpPos, agent);
 			}
+
+
 			checkLocalityPrinciple();
 			today.add(Calendar.DAY_OF_MONTH, 1);
 			try {
@@ -175,7 +178,7 @@ public class Simulator implements Runnable {
 
 	}
 
-	public FollowScreensPanel getPanel() {
+	public ScreensPanel getPanel() {
 		return panel.getScreens();
 	}
 

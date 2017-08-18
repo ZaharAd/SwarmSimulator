@@ -3,6 +3,7 @@ package simulation;
 public class Direction {
 
 	private int angle;
+
 	
 	/**
 	 * Creates a direction (angle)
@@ -41,11 +42,5 @@ public class Direction {
 	public String toString() {
 		return Integer.toString(angle);
 	}
-	
-	public static void main(String[] args) {
-		Direction d = new Direction(-270);
-		System.out.println(d.getAngle());
-	}
-	
-	
+
 }

@@ -59,17 +59,17 @@ class AgentComponent extends JComponent {
 		ys[2] = getHeight();
 	}
 
-	private static Color giveMeAColor() {
-		return new Color(getRandomRgb(),getRandomRgb(),getRandomRgb());
-	}
+//	private static Color giveMeAColor() {
+//		return new Color(getRandomRgb(),getRandomRgb(),getRandomRgb());
+//	}
 
 	public Agent getAgent() {
 		return agent;
 	}
 
-	private static int getRandomRgb() {
-		return random.nextInt(256);
-	}
+//	private static int getRandomRgb() {
+//		return random.nextInt(256);
+//	}
 
 	@Override
 	public void paintComponent(Graphics g) {
@@ -79,12 +79,13 @@ class AgentComponent extends JComponent {
 		//g2.clearRect(0, 0, getWidth(), getHeight());
 		g2.setColor(agentColor);
 
+//		System.out.println("*********** agent.getAngle() : " + agent.getAngle());
 		g2.rotate(Math.toRadians(agent.getAngle()),
 				getWidth()/2, getHeight()/2);
 		g2.fill(shape);
 	}
-
-	public void setLastLocation(int[] lastLocation) {
-		this.lastLocation = lastLocation;
-	}
+//
+//	public void setLastLocation(int[] lastLocation) {
+//		this.lastLocation = lastLocation;
+//	}
 }
