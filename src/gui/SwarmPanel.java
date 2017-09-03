@@ -27,7 +27,7 @@ public class SwarmPanel extends JPanel implements KeyListener {
 	public static final int SCALE = 7;
 
 	private JLabel messageLabel = new JLabel();
-	private JPanel leaderPanel;
+	//	private JPanel leaderPanel;
 	private JLabel leaderDirection;;
 	private int angle ;
 	private double hight;
@@ -75,7 +75,7 @@ public class SwarmPanel extends JPanel implements KeyListener {
 			add(components[i]);
 		}
 
-		leaderPanel = screens.getLeaderPanel();
+//		leaderPanel = screens.getLeaderPanel();
 		leaderDirection = new JLabel();;
 		Dimension screenLocation = screens.getLeaderLocation();
 		leaderDirection.setLocation((int)screenLocation.getWidth()+300,(int)screenLocation.getHeight()+450);
@@ -132,70 +132,82 @@ public class SwarmPanel extends JPanel implements KeyListener {
 	public void keyPressed(KeyEvent e) {
 		Agent leaderAgent = components[0].getAgent();
 
-		if (e.getKeyCode() == KeyEvent.VK_UP) {
-			leaderAgent.setCommand(Agent.AgentControl.PitchForward);
+		System.out.println("lalala");
+
+		if(e.getKeyCode() == KeyEvent.VK_T){
+			leaderAgent.setSideCommand(Agent.AgentControl.TakeOf);
+//			screens.
+//			components[0].
+		}else if (e.getKeyCode() == KeyEvent.VK_L) {
+			leaderAgent.setSideCommand(Agent.AgentControl.Land);
+		}else if (e.getKeyCode() == KeyEvent.VK_UP) {
+			leaderAgent.setSideCommand(Agent.AgentControl.PitchForward);
 			leaderDirection.setText("\nFront key pressed");
-		}
-		if (e.getKeyCode() == KeyEvent.VK_DOWN) {
-			leaderAgent.setCommand(Agent.AgentControl.PitchBackward);
-			leaderDirection.setText("\nBack key pressed");
-		}
-		if (e.getKeyCode() == KeyEvent.VK_RIGHT) {
-			leaderAgent.setCommand(Agent.AgentControl.RollRight);
-			leaderDirection.setText("\nRight key pressed");
-		}
-		if (e.getKeyCode() == KeyEvent.VK_LEFT) {
-			leaderAgent.setCommand(Agent.AgentControl.RollLeft);
+		}else if (e.getKeyCode() == KeyEvent.VK_RIGHT) {
+			leaderAgent.setSideCommand(Agent.AgentControl.RollRight);
+			screens.setKeyPressed("VK_RIGHT");
+		}else if (e.getKeyCode() == KeyEvent.VK_LEFT) {
+			leaderAgent.setSideCommand(Agent.AgentControl.RollLeft);
 			leaderDirection.setText("\nLeft key pressed");
-		}
-		if (e.getKeyCode() == KeyEvent.VK_D) {;
-			isTurn = true;
-//			angle ++;
-			leaderAgent.getDirection().turn(1);
-			leaderDirection.setText("\nClockwise");
-		}
-		if (e.getKeyCode() == KeyEvent.VK_A) {
-			isTurn = true;
-//			angle++;
-			leaderAgent.getDirection().turn(-1);
-			leaderDirection.setText("\nCounterClockwise");
-		}
-		if (e.getKeyCode() == KeyEvent.VK_W) {
-			hight+= 0.25;
+		}else if (e.getKeyCode() == KeyEvent.VK_DOWN) {;
+			leaderAgent.setDirCommand(Agent.AgentControl.Hover);
+			leaderAgent.setSideCommand(Agent.AgentControl.Hover);
+		}else if (e.getKeyCode() == KeyEvent.VK_D) {;
+			leaderAgent.setDirCommand(Agent.AgentControl.YawRight);
+			leaderDirection.setText("\nYaw right");
+		}else if (e.getKeyCode() == KeyEvent.VK_A) {
+			leaderAgent.setDirCommand(Agent.AgentControl.YawLeft);
+			leaderDirection.setText("\nYaw left");
+		}else if (e.getKeyCode() == KeyEvent.VK_W) {
+			leaderAgent.setDirCommand(Agent.AgentControl.ThrottleHigh);
 			leaderDirection.setText("\nUp key pressed");
-		}
-		if (e.getKeyCode() == KeyEvent.VK_S) {
-			hight+= 0.25;
+		}else if (e.getKeyCode() == KeyEvent.VK_S) {
+			leaderAgent.setDirCommand(Agent.AgentControl.ThrottleLow);
 			leaderDirection.setText("\nDown key pressed");
 		}
 
-		leaderPanel.add(leaderDirection);// TODO arrows
+
+//		screens.getAgentPanelsArr()[0].setLeaderDir(leaderDirection);
+//		leaderPanel.add(leaderDirection);// TODO arrows
 	}
 
 	@Override
 	public void keyReleased(KeyEvent e) {
-		Agent leader = components[0].getAgent();
-		if (e.getKeyCode() == KeyEvent.VK_D) {
 
-		}
-		if (e.getKeyCode() == KeyEvent.VK_A) {
+		Agent leaderAgent = components[0].getAgent();
+		leaderAgent.setDirCommand(Agent.AgentControl.Hover);
 
-		}
-		if (e.getKeyCode() == KeyEvent.VK_W) {
-			leaderDirection.setText("\n" + hight + " meters");
-		}
-		if (e.getKeyCode() == KeyEvent.VK_S) {
-			leaderDirection.setText("\n" + hight + " meters");
-		}
+		if (e.getKeyCode() == KeyEvent.VK_D) {;
 
-		new Timer().schedule(new TimerTask() {
-			@Override
-			public void run() {
-				leaderDirection.setText("");
-			}
-		}, 5000);
-
-		hight = 0;
+		}else if (e.getKeyCode() == KeyEvent.VK_A) {
+//			components[1].update();
+		}
+		/*Agent leaderAgent = */
+//		if (e.getKeyCode() == KeyEvent.VK_D) {
+//			leaderAgent.setDirCommand(Agent.AgentControl.Hover);
+//		}
+//		if (e.getKeyCode() == KeyEvent.VK_A) {
+//			leaderAgent.setDirCommand(Agent.AgentControl.Hover);
+//		}
+//		if (e.getKeyCode() == KeyEvent.VK_W) {
+//			leaderAgent.setDirCommand(Agent.AgentControl.Hover);
+//
+//			leaderDirection.setText("\n" + hight + " meters");
+//		}
+//		if (e.getKeyCode() == KeyEvent.VK_S) {
+//			leaderDirection.setText("\n" + hight + " meters");
+//		}
+//
+//		leaderAgent.setDirCommand(Agent.AgentControl.Hover);
+//
+//		new Timer().schedule(new TimerTask() {
+//			@Override
+//			public void run() {
+//				leaderDirection.setText("");
+//			}
+//		}, 5000);
+//
+//		hight = 0;
 	}
 
 }

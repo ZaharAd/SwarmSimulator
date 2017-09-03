@@ -35,10 +35,8 @@ public class Simulator implements Runnable {
 	private Calendar today = new GregorianCalendar(2011, Calendar.MARCH, 13);
 	private final Calendar LAST_DAY = new GregorianCalendar(2015, Calendar.MARCH, 24);
 
-	static final Random randomGenerator = new Random();
 
 	private static final Simulator sim = new Simulator();
-	private boolean firstInSecRow = true;
 
 	private Agent[] agents = new Agent[N_OF_AGENTS];
 
@@ -54,68 +52,29 @@ public class Simulator implements Runnable {
 		grid = new Agent[MAX_X][MAX_Y];
 		int i = 0;
 		Vector2D startPoint = new Vector2D(10, MAX_Y -20);
-		Direction startDir = new Direction(0);
 
 		//leader
 		// * -
 		// - -
 		agents[i++] = grid[startPoint.getX()][startPoint.getY()] = new Agent(
 				Agent.AgentSwarmBehaviour.SWARM_LEADER,
-				startDir,
+				new Direction(0),
+				new Height(15),
 				startPoint.getX(),
 				startPoint.getY()
 		);
-		//leaders row
-		// - *
-		// - -
-//		agents[i++] = grid[startPoint.getX() + 10][startPoint.getY()] = new Agent(
-//				AgentSwarmBehaviour.FOLLOW_LEFT,
-////				AgentSwarmBehaviour.NORMAL,
-//				startDir,
-//				startPoint.getX() + 10,
-//				startPoint.getY()
-//		);
-
 		//behind leader
 		// - -
 		// * -
 		agents[i] = grid[startPoint.getX()][startPoint.getY() + 10] = new Agent(
 				Agent.AgentSwarmBehaviour.FOLLOW_FRONT,
-				startDir,
+				new Direction(0),
+				new Height(15),
 				startPoint.getX(),
 				startPoint.getY() + 10
 		);
-		// - -
-		// - *
-//		agents[i++] = grid[startPoint.getX() + 10][startPoint.getY() - 10] = new Agent(
-//				Agent.AgentSwarmBehaviour.LAST,
-//				startDir,
-//				startPoint.getX() + 10,
-//				startPoint.getY()  + 10
-//		);
 	}
-//
-//	private Direction getRandomDirection() {
-//		return new Direction(Math.random());
-//	}
 
-	public List<Agent> getNeighbours(Agent requester, int distance) {
-		List<Agent> neighbours = new ArrayList<Agent>();
-		int maxHor = requester.getX() + distance;
-		maxHor = Math.min(maxHor, MAX_X-1);
-		int maxVer = requester.getY() + distance;
-		maxVer = Math.min(maxVer, MAX_Y-1);
-		int minHor = requester.getX() - distance;
-		minHor = Math.max(minHor, 0);
-		int minVer = requester.getY() - distance;
-		minVer = Math.max(minVer, 0);
-		for (int hor = minHor; hor <= maxHor; hor++) {
-			for (int ver = minVer; ver <= maxVer; ver++) {
-				if (grid[hor][ver] != null && grid[hor][ver] != requester) neighbours.add(grid[hor][ver]);
-			}
-		}
-		return neighbours;
-	}
 
 	private void startGui() {
 		SwingUtilities.invokeLater(new Runnable() {
@@ -178,10 +137,6 @@ public class Simulator implements Runnable {
 
 	}
 
-	public ScreensPanel getPanel() {
-		return panel.getScreens();
-	}
-
 	private void ensureAgentInValidPos(Vector2D oldPos, Agent agent) {
 		if (agent.getX() < 0) agent.x = MAX_X + agent.getX();
 		if (agent.getX() >= MAX_X) agent.x = agent.getX() - MAX_X;
@@ -226,11 +181,4 @@ public class Simulator implements Runnable {
 		}
 	}
 
-	public boolean isFirstInSecRow() {
-		return firstInSecRow;
-	}
-
-	public void setFirstInSecRow(boolean firstInSecRow) {
-		this.firstInSecRow = firstInSecRow;
-	}
 }

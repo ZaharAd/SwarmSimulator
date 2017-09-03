@@ -25,7 +25,8 @@ class AgentComponent extends JComponent {
 
 	AgentComponent(Agent agent) {
 		this.agent = agent;
-		this.setSize(new Dimension(SIZE*SwarmPanel.SCALE,SIZE*SwarmPanel.SCALE));
+//		this.setSize(new Dimension(SIZE*SwarmPanel.SCALE,SIZE*SwarmPanel.SCALE));
+		this.setSize(new Dimension(10, 10));
 		this.setVisible(true);
 		decideAgentColor();
 		shape = new Polygon();
@@ -36,10 +37,18 @@ class AgentComponent extends JComponent {
 
 	private void decideAgentColor() {
 		switch (agent.getAgentBehaviour()) {
-			case SWARM_LEADER: this.agentColor = Color.RED; break;
-			case FOLLOW_LEFT: this.agentColor =  Color.BLACK; break;
-			case FOLLOW_FRONT: this.agentColor = Color.BLACK; break;
-			case LAST: this.agentColor = Color.BLACK; break;
+			case SWARM_LEADER:
+				this.agentColor = Color.RED;
+				break;
+			case FOLLOW_LEFT:
+				this.agentColor = Color.BLACK;
+				break;
+			case FOLLOW_FRONT:
+				this.agentColor = Color.BLACK;
+				break;
+			case LAST:
+				this.agentColor = Color.BLACK;
+				break;
 		}
 	}
 
@@ -48,10 +57,14 @@ class AgentComponent extends JComponent {
 			decideAgentColor();
 		}
 		currentBehaviour = agent.getAgentBehaviour();
-		setLocation(agent.getX()*SwarmPanel.SCALE, agent.getY()*SwarmPanel.SCALE);
+		setLocation(agent.getX() * SwarmPanel.SCALE, agent.getY() * SwarmPanel.SCALE);
+		setSize(new Dimension(agent.getHeight().getHeight(), agent.getHeight().getHeight()));
+		this.repaint();
+
+
 		int[] xs = shape.xpoints;
 		int[] ys = shape.ypoints;
-		xs[0] = getWidth()/2;
+		xs[0] = getWidth() / 2;
 		ys[0] = 0;
 		xs[1] = xs[0] - shapeWidth;
 		ys[1] = getHeight();
@@ -81,11 +94,9 @@ class AgentComponent extends JComponent {
 
 //		System.out.println("*********** agent.getAngle() : " + agent.getAngle());
 		g2.rotate(Math.toRadians(agent.getAngle()),
-				getWidth()/2, getHeight()/2);
+				getWidth() / 2, getHeight() / 2);
+
 		g2.fill(shape);
+//		this.setSize(new Dimension(agent.getHeight().getHeight(),agent.getHeight().getHeight()));
 	}
-//
-//	public void setLastLocation(int[] lastLocation) {
-//		this.lastLocation = lastLocation;
-//	}
 }

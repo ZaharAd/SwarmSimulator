@@ -2,9 +2,12 @@ package gui;
 
 import simulation.Simulator;
 
+import javax.imageio.ImageIO;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.image.BufferedImage;
+import java.io.File;
+import java.io.IOException;
 
 import static gui.SwarmPanel.SCALE;
 
@@ -13,13 +16,14 @@ import static gui.SwarmPanel.SCALE;
  */
 public class ScreensPanel extends JPanel {
 
-    private JPanel LeaderPanel;
+    private AgentScreen LeaderPanel;
     private AgentScreen SecondPanel;
     private AgentScreen BehindLeaderPanel;
     private AgentScreen LastPanel;
 
     private static AgentScreen[] members;
     private Dimension leaderLocation;//, secondLocation, behindeLocation, lastLocation;
+    private String keyPressed = "";
 
     private static final ScreensPanel screens = new ScreensPanel();
 
@@ -39,10 +43,13 @@ public class ScreensPanel extends JPanel {
         setBounds(Simulator.MAX_X*SCALE +10, 0, Simulator.MAX_X*SCALE + 600  , Simulator.MAX_Y*SCALE);
         setBackground(Color.black);
 
-        LeaderPanel = new JPanel();
+//        LeaderPanel = new AgentScreen();//new JPanel();
 
 //        SecondPanel = new AgentScreen();
 //        SecondPanel.setCameraSide("left");
+
+        LeaderPanel = new AgentScreen();
+
 
         BehindLeaderPanel = new AgentScreen();
         BehindLeaderPanel.setCameraSide("frontL");
@@ -50,14 +57,14 @@ public class ScreensPanel extends JPanel {
 //        LastPanel = new AgentScreen();
 //        LastPanel.setCameraSide("frontS");
 
-        members = new AgentScreen[] {BehindLeaderPanel};//{SecondPanel, BehindLeaderPanel, LastPanel};
+        members = new AgentScreen[] {LeaderPanel, BehindLeaderPanel};//{SecondPanel, BehindLeaderPanel, LastPanel};
 //
 ////        paintComponent();
 //
 //        LeaderPanel.setBackground(Color.yellow);
 //        LeaderPanel.setLocation(0,0);
 //        LeaderPanel.setSize(20,20);
-////        setBounds(0,0,20,20);
+//        setBounds(0,0,20,20);
 //        add(LeaderPanel);
 
 //        SecondPanel.setBackground(Color.black);
@@ -92,23 +99,47 @@ public class ScreensPanel extends JPanel {
 
         Graphics2D g2 = (Graphics2D) g;
 
-        members[0].draw(g2,0 , 365);
+
+
+        members[0].drawLeader(g2);
+        drawDirection(g2);
+
+
+
+        members[1].draw(g2);
+
+
 //        members[0].draw(g2,300,0);
 //        members[1].draw(g2,0,365);
 //        members[2].draw(g2,300,365);
 
     }
 
+    private void drawDirection(Graphics2D g2) {
+        BufferedImage image = null;
+
+
+        if(keyPressed.equals("VK_RIGHT")) {
+            try {
+                image = ImageIO.read(new File("/home/zahar/IdeaProjects/SwarmSimulatorG/src/gui/leaderDirection/rollRight.png"));
+                g2.drawImage(image, 250, 150, 100, 100, this);
+//                g2.drawString("roll right", 250,30);
+            } catch (IOException ex) {
+                // handle exception...
+            }
+        }
+    }
+
     public void repaintPoints(){
         repaint();
     }
 
-    public String findIRpos(String cameraSide) {
+    public String[] findIRpos(String cameraSide) {
         BufferedImage img = new BufferedImage(600, 720, BufferedImage.TYPE_INT_RGB);
         Graphics2D g2 = img.createGraphics();
         this.paint(g2);
 
-        String ans = members[0].secRowReading(img,0,365);
+        String[] ans = members[1].secRowReading(img,0,365);
 
 //        if(cameraSide.equals("left")){
 //            ans = members[0].firstRowReading(img);
@@ -130,6 +161,14 @@ public class ScreensPanel extends JPanel {
 
     }
 
+    public String getKeyPressed() {
+        return keyPressed;
+    }
+
+    public void setKeyPressed(String keyPressed) {
+        this.keyPressed = keyPressed;
+    }
+
     public AgentScreen[] getAgentPanelsArr (){
         return members;
     }
@@ -142,11 +181,11 @@ public class ScreensPanel extends JPanel {
         this.leaderLocation = leaderLocation;
     }
 
-    public JPanel getLeaderPanel() {
+    public AgentScreen getLeaderPanel() {
         return LeaderPanel;
     }
 
-    public void setLeaderPanel(JPanel leaderPanel) {
+    public void setLeaderPanel(AgentScreen leaderPanel) {
         LeaderPanel = leaderPanel;
     }
 

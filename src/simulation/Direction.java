@@ -32,7 +32,7 @@ public class Direction {
 	}
 
 	public void setAngle(int angle) {
-		this.angle = angle;
+		this.angle = sanitizeAngle(angle);
 	}
 
 	private int sanitizeAngle(int angle) {
