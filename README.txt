@@ -1,4 +1,4 @@
-<br>Swarm Simulator<br>
+Swarm Simulator
 
 
 The project uses Java Swing to create a visual swarm of drones.
