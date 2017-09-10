@@ -1,6 +1,6 @@
 package gui;
 
-import simulation.Simulator;
+import simulation.Main_Simulator;
 
 import javax.imageio.ImageIO;
 import javax.swing.*;
@@ -33,14 +33,14 @@ public class ScreensPanel extends JPanel {
     }
 
     private void init() {
-        leaderLocation = new Dimension(Simulator.MAX_X*SCALE +10, 0);
+        leaderLocation = new Dimension(Main_Simulator.MAX_X*SCALE +10, 0);
 
-        final Dimension size = new Dimension(600, Simulator.MAX_Y*SCALE);
+        final Dimension size = new Dimension(600, Main_Simulator.MAX_Y*SCALE);
 
         setLayout(new GridLayout());
         setSize(size);
 
-        setBounds(Simulator.MAX_X*SCALE +10, 0, Simulator.MAX_X*SCALE + 600  , Simulator.MAX_Y*SCALE);
+        setBounds(Main_Simulator.MAX_X*SCALE +10, 0, Main_Simulator.MAX_X*SCALE + 600  , Main_Simulator.MAX_Y*SCALE);
         setBackground(Color.black);
 
 //        LeaderPanel = new AgentScreen();//new JPanel();
@@ -89,7 +89,7 @@ public class ScreensPanel extends JPanel {
 //        secRow.setDividerLocation(300);
 //
 //        JSplitPane pane = new JSplitPane(JSplitPane.VERTICAL_SPLIT,firstRow, secRow);
-//        pane.setDividerLocation(Simulator.MAX_Y*SCALE / 2);
+//        pane.setDividerLocation(Main_Simulator.MAX_Y*SCALE / 2);
 //        add(pane);
     }
 

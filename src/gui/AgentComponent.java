@@ -9,22 +9,22 @@ import java.util.Random;
 
 import javax.swing.JComponent;
 
-import simulation.Agent;
+import simulation.Drone;
 
 @SuppressWarnings("serial")
 class AgentComponent extends JComponent {
 
 	private static final Random random = new Random();
 	private static final int SIZE = 2;
-	private Agent agent;
+	private Drone drone;
 	private Polygon shape;
 	private int shapeWidth = 10;
 	private Color agentColor;
-	private Agent.AgentSwarmBehaviour currentBehaviour;
+	private Drone.droneBehaviour currentBehaviour;
 	private int[] lastLocation;
 
-	AgentComponent(Agent agent) {
-		this.agent = agent;
+	AgentComponent(Drone drone) {
+		this.drone = drone;
 //		this.setSize(new Dimension(SIZE*SwarmPanel.SCALE,SIZE*SwarmPanel.SCALE));
 		this.setSize(new Dimension(10, 10));
 		this.setVisible(true);
@@ -36,14 +36,14 @@ class AgentComponent extends JComponent {
 	}
 
 	private void decideAgentColor() {
-		switch (agent.getAgentBehaviour()) {
+		switch (drone.getAgentBehaviour()) {
 			case SWARM_LEADER:
 				this.agentColor = Color.RED;
 				break;
 			case FOLLOW_LEFT:
 				this.agentColor = Color.BLACK;
 				break;
-			case FOLLOW_FRONT:
+			case FOLLOW_FRONT_IR:
 				this.agentColor = Color.BLACK;
 				break;
 			case LAST:
@@ -53,12 +53,12 @@ class AgentComponent extends JComponent {
 	}
 
 	void update() {
-		if (agent.getAgentBehaviour() != currentBehaviour) {
+		if (drone.getAgentBehaviour() != currentBehaviour) {
 			decideAgentColor();
 		}
-		currentBehaviour = agent.getAgentBehaviour();
-		setLocation(agent.getX() * SwarmPanel.SCALE, agent.getY() * SwarmPanel.SCALE);
-		setSize(new Dimension(agent.getHeight().getHeight(), agent.getHeight().getHeight()));
+		currentBehaviour = drone.getAgentBehaviour();
+		setLocation(drone.getX() * SwarmPanel.SCALE, drone.getY() * SwarmPanel.SCALE);
+		setSize(new Dimension(drone.getHeight().getHeight(), drone.getHeight().getHeight()));
 		this.repaint();
 
 
@@ -77,8 +77,8 @@ class AgentComponent extends JComponent {
 //		return new Color(getRandomRgb(),getRandomRgb(),getRandomRgb());
 //	}
 
-	public Agent getAgent() {
-		return agent;
+	public Drone getDrone() {
+		return drone;
 	}
 
 //	private static int getRandomRgb() {
@@ -93,11 +93,11 @@ class AgentComponent extends JComponent {
 		//g2.clearRect(0, 0, getWidth(), getHeight());
 		g2.setColor(agentColor);
 
-//		System.out.println("*********** agent.getAngle() : " + agent.getAngle());
-		g2.rotate(Math.toRadians(agent.getAngle()),
+//		System.out.println("*********** drone.getAngle() : " + drone.getAngle());
+		g2.rotate(Math.toRadians(drone.getAngle()),
 				getWidth() / 2, getHeight() / 2);
 
 		g2.fill(shape);
-//		this.setSize(new Dimension(agent.getHeight().getHeight(),agent.getHeight().getHeight()));
+//		this.setSize(new Dimension(drone.getHeight().getHeight(),drone.getHeight().getHeight()));
 	}
 }

@@ -1,21 +1,19 @@
 package simulation;
 
-import gui.ScreensPanel;
 import gui.SwarmPanel;
 
 import java.util.*;
 
 import javax.swing.SwingUtilities;
 
-import simulation.Agent.AgentSwarmBehaviour;
 import simulation.util.Vector2D;
 
-public class Simulator implements Runnable {
+public class Main_Simulator implements Runnable {
 
 
 	public static void main(String[] args) {
 
-		final Simulator simulator = Simulator.getInstance();
+		final Main_Simulator simulator = Main_Simulator.getInstance();
 
 		simulator.startGui();
 
@@ -31,43 +29,47 @@ public class Simulator implements Runnable {
 
 	private SwarmPanel panel;
 
-	private static Agent[][] grid;
+	private static Drone[][] grid;
 	private Calendar today = new GregorianCalendar(2011, Calendar.MARCH, 13);
 	private final Calendar LAST_DAY = new GregorianCalendar(2015, Calendar.MARCH, 24);
 
 
-	private static final Simulator sim = new Simulator();
+	private static final Main_Simulator sim = new Main_Simulator();
 
-	private Agent[] agents = new Agent[N_OF_AGENTS];
+	private Drone[] drones = new Drone[N_OF_AGENTS];
 
-	private Simulator() {}
+	private Main_Simulator() {}
 
-	public static Simulator getInstance() {
+	/**
+	 * singelton instance creation
+	 * @return
+	 */
+	public static Main_Simulator getInstance() {
 		if (grid == null) sim.init();
 		return sim;
 	}
 
 	private void init() {
 		System.out.println("Initialising the simulation");
-		grid = new Agent[MAX_X][MAX_Y];
+		grid = new Drone[MAX_X][MAX_Y];
 		int i = 0;
 		Vector2D startPoint = new Vector2D(10, MAX_Y -20);
 
 		//leader
-		// * -
-		// - -
-		agents[i++] = grid[startPoint.getX()][startPoint.getY()] = new Agent(
-				Agent.AgentSwarmBehaviour.SWARM_LEADER,
+		// *
+		// -
+		drones[i++] = grid[startPoint.getX()][startPoint.getY()] = new Drone(
+				Drone.droneBehaviour.SWARM_LEADER,
 				new Direction(0),
 				new Height(15),
 				startPoint.getX(),
 				startPoint.getY()
 		);
 		//behind leader
-		// - -
-		// * -
-		agents[i] = grid[startPoint.getX()][startPoint.getY() + 10] = new Agent(
-				Agent.AgentSwarmBehaviour.FOLLOW_FRONT,
+		// -
+		// *
+		drones[i] = grid[startPoint.getX()][startPoint.getY() + 10] = new Drone(
+				Drone.droneBehaviour.FOLLOW_FRONT_IR,
 				new Direction(0),
 				new Height(15),
 				startPoint.getX(),
@@ -76,12 +78,15 @@ public class Simulator implements Runnable {
 	}
 
 
+	/**
+	 * Start the SwarmPanel
+	 */
 	private void startGui() {
 		SwingUtilities.invokeLater(new Runnable() {
 			@Override
 			public void run() {
 				panel = new SwarmPanel();
-				panel.init(agents);
+				panel.init(drones);
 			}
 		});
 	}
@@ -99,23 +104,28 @@ public class Simulator implements Runnable {
 			respond[i] = false;
 		}
 
-		while (today.before(LAST_DAY)) {
+		while (today.before(LAST_DAY)) {//while(true){
 			System.out.println();
+
+			//print grid
 			for (int i = 0; i < grid.length; i++) {
 				for (int j = 0; j < grid[i].length; j++) {
 					if(grid[i][j] != null) System.out.println("i:" + i +", j:" +j + ": (" + grid[i][j]+")");
 				}
 			}
-			for (Agent agent : agents) {
-				tmpPos.x = agent.x;
-				tmpPos.y = agent.y;
+
+			for (Drone drone : drones) {
+				tmpPos.x = drone.x;
+				tmpPos.y = drone.y;
 
 				if(panel != null && panel.getScreens() != null && panel.getScreens().getAgentPanelsArr() != null) {
-					agent.dailyCycle();// read from screens / byPress for the leader
+
+					//the main function of the drones movemant
+					drone.dailyCycle();
 				}
 
 
-				if (!agent.getPos().equals(tmpPos)) ensureAgentInValidPos(tmpPos, agent);
+				if (!drone.getPos().equals(tmpPos)) ensureAgentInValidPos(tmpPos, drone);
 			}
 
 
@@ -137,24 +147,24 @@ public class Simulator implements Runnable {
 
 	}
 
-	private void ensureAgentInValidPos(Vector2D oldPos, Agent agent) {
-		if (agent.getX() < 0) agent.x = MAX_X + agent.getX();
-		if (agent.getX() >= MAX_X) agent.x = agent.getX() - MAX_X;
-		if (agent.getY() < 0) agent.y = MAX_Y + agent.getY();
-		if (agent.getY() >= MAX_Y) agent.y = agent.getY() - MAX_Y;
-		Agent wantedGrid = grid[agent.getX()][agent.getY()];
+	private void ensureAgentInValidPos(Vector2D oldPos, Drone drone) {
+		if (drone.getX() < 0) drone.x = MAX_X + drone.getX();
+		if (drone.getX() >= MAX_X) drone.x = drone.getX() - MAX_X;
+		if (drone.getY() < 0) drone.y = MAX_Y + drone.getY();
+		if (drone.getY() >= MAX_Y) drone.y = drone.getY() - MAX_Y;
+		Drone wantedGrid = grid[drone.getX()][drone.getY()];
 		if (wantedGrid == null) {
-			grid[agent.getX()][agent.getY()] = agent;
+			grid[drone.getX()][drone.getY()] = drone;
 			grid[oldPos.getX()][oldPos.getY()] = null;
-		} else if (wantedGrid != agent) {
-			agent.setPos(oldPos);
+		} else if (wantedGrid != drone) {
+			drone.setPos(oldPos);
 		}
 	}
 
 	private void checkLocalityPrinciple() {
 		Set<Vector2D> takenPos = new HashSet<Vector2D>();
-		for (Agent agent : agents) {
-			if (!takenPos.add(agent.getPos())) throw new RuntimeException("Position already taken: " + agent.getPos());
+		for (Drone drone : drones) {
+			if (!takenPos.add(drone.getPos())) throw new RuntimeException("Position already taken: " + drone.getPos());
 		}
 	}
 
@@ -176,8 +186,8 @@ public class Simulator implements Runnable {
 	}
 
 	private void printAgents() {
-		for (Agent agent : agents) {
-			System.out.println(agent);
+		for (Drone drone : drones) {
+			System.out.println(drone);
 		}
 	}
 
