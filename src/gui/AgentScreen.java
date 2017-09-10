@@ -55,8 +55,6 @@ public class AgentScreen {
         b2 = i1;
 
 
-        //for yaw:
-
         g2.setColor(Color.RED);
 
         //first point
@@ -78,69 +76,8 @@ public class AgentScreen {
         g2.fillPolygon(xs,ys,xs.length);
 
 
-//        if(turn == 0) {
-//            //first point
-//            y = i1 + currY_1;
-//            x = i + currX_1;
-//            xs = new int[]{x - currIRdim, x - currIRdim, x + currIRdim, x + currIRdim};
-//            ys = new int[]{y + currIRdim, y - currIRdim, y - currIRdim, y + currIRdim};
-//
-//            g2.drawPolygon(xs,ys,xs.length);
-//            g2.fillPolygon(xs,ys,xs.length);
-//
-//            //second point
-//            y = i1 + currY_2;
-//            x = i + currX_2;
-//            xs = new int[]{x - currIRdim,x - currIRdim,x + currIRdim,x + currIRdim};
-//            ys = new int[]{y + currIRdim,y - currIRdim,y - currIRdim,y + currIRdim};
-//
-//            g2.drawPolygon(xs,ys,xs.length);
-//            g2.fillPolygon(xs,ys,xs.length);
-//        }else if(turn == 1){
-//            //first point
-//            y = i1 + currY_1;
-//            x = i + currX_1;
-//            xs = new int[]{x - currIRdim, x - currIRdim, x + currIRdim, x + currIRdim};
-//            ys = new int[]{y + currIRslop/*currIRdim/3*/, y - currIRslop/*currIRdim/3*/, y - currIRdim, y + currIRdim};
-//
-//            g2.drawPolygon(xs,ys,xs.length);
-//            g2.fillPolygon(xs,ys,xs.length);
-//
-//            //second point
-//            y = i1 + currY_2;
-//            x = i + currX_2;
-//            xs = new int[]{x - currIRdim,x - currIRdim,x + currIRdim,x + currIRdim};
-//            ys = new int[]{y + currIRslop/*currIRdim/3*/,y - currIRslop/*currIRdim/3*/,y - currIRdim,y + currIRdim};
-//
-//            g2.drawPolygon(xs,ys,xs.length);
-//            g2.fillPolygon(xs,ys,xs.length);
-//
-//            turn =0;
-//
-////        int[] xs = new int[]{i + 288,i + 288,i + 301,i + 301};
-////        int[] ys = new int[]{i1 + 96,i1 + 103,i1 + 107,i1 + 93};
-//        }else{
-//            //first point
-//            y = i1 + currY_1;
-//            x = i + currX_1;
-//            xs = new int[]{x - currIRdim, x - currIRdim, x + currIRdim, x + currIRdim};
-//            ys = new int[]{y + currIRdim, y - currIRdim, y - currIRslop/*currIRdim/3*/, y + currIRslop/*currIRdim/3*/};
-//
-//            g2.drawPolygon(xs,ys,xs.length);
-//            g2.fillPolygon(xs,ys,xs.length);
-//
-//            //second point
-//            y = i1 + currY_2;
-//            x = i + currX_2;
-//            xs = new int[]{x - currIRdim,x - currIRdim,x + currIRdim,x + currIRdim};
-//            ys = new int[]{y + currIRdim,y - currIRdim,y - currIRslop/*currIRdim/3*/,y + currIRslop/*currIRdim/3*/};
-//
-//            g2.drawPolygon(xs,ys,xs.length);
-//            g2.fillPolygon(xs,ys,xs.length);
-//
-//            turn =0;
-//
-//        }
+        //TODO add gausyan noise
+
 
     }
 

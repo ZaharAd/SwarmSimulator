@@ -44,6 +44,10 @@ public class Agent {
 		this.height = height;
 		this.sideCommand = AgentControl.Hover;
 		this.dirCommand = AgentControl.Hover;
+
+		// *  ^
+		// ^  ^
+		//
 	}
 
 	public AgentSwarmBehaviour getAgentBehaviour() {

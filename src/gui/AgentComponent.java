@@ -62,6 +62,7 @@ class AgentComponent extends JComponent {
 		this.repaint();
 
 
+
 		int[] xs = shape.xpoints;
 		int[] ys = shape.ypoints;
 		xs[0] = getWidth() / 2;
