@@ -16,12 +16,10 @@ import static gui.SwarmPanel.SCALE;
  */
 public class ScreensPanel extends JPanel {
 
-    private AgentScreen LeaderPanel;
-    private AgentScreen SecondPanel;
-    private AgentScreen BehindLeaderPanel;
-    private AgentScreen LastPanel;
+    private droneScreen LeaderPanel;
+    private droneScreen BehindLeaderPanel;
 
-    private static AgentScreen[] members;
+    private static droneScreen[] members;
     private Dimension leaderLocation;//, secondLocation, behindeLocation, lastLocation;
     private String keyPressed = "";
 
@@ -36,61 +34,16 @@ public class ScreensPanel extends JPanel {
         leaderLocation = new Dimension(Main_Simulator.MAX_X*SCALE +10, 0);
 
         final Dimension size = new Dimension(600, Main_Simulator.MAX_Y*SCALE);
-
         setLayout(new GridLayout());
         setSize(size);
-
         setBounds(Main_Simulator.MAX_X*SCALE +10, 0, Main_Simulator.MAX_X*SCALE + 600  , Main_Simulator.MAX_Y*SCALE);
         setBackground(Color.black);
 
-//        LeaderPanel = new AgentScreen();//new JPanel();
-
-//        SecondPanel = new AgentScreen();
-//        SecondPanel.setCameraSide("left");
-
-        LeaderPanel = new AgentScreen();
-
-
-        BehindLeaderPanel = new AgentScreen();
+        LeaderPanel = new droneScreen();
+        BehindLeaderPanel = new droneScreen();
         BehindLeaderPanel.setCameraSide("frontL");
 
-//        LastPanel = new AgentScreen();
-//        LastPanel.setCameraSide("frontS");
-
-        members = new AgentScreen[] {LeaderPanel, BehindLeaderPanel};//{SecondPanel, BehindLeaderPanel, LastPanel};
-//
-////        paintComponent();
-//
-//        LeaderPanel.setBackground(Color.yellow);
-//        LeaderPanel.setLocation(0,0);
-//        LeaderPanel.setSize(20,20);
-//        setBounds(0,0,20,20);
-//        add(LeaderPanel);
-
-//        SecondPanel.setBackground(Color.black);
-//        SecondPanel.setCameraSide("left");
-//        BehindLeaderPanel.setBackground(Color.black);
-//        BehindLeaderPanel.setCameraSide("front");
-//        LastPanel.setBackground(Color.black);
-//        LastPanel.setCameraSide("front");
-////
-        JLabel direction = new JLabel();
-        direction.setLocation((int)leaderLocation.getWidth() + 20,(int)leaderLocation.getHeight() + 20);
-        direction.setSize(500, 50);
-        direction.setText("SWARM simulation");
-
-        //        LastPanel.add(direction);
-//
-//
-//
-//        JSplitPane firstRow = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT , LeaderPanel, SecondPanel);
-//        firstRow.setDividerLocation(300);
-//        JSplitPane secRow = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT , BehindLeaderPanel, LastPanel);
-//        secRow.setDividerLocation(300);
-//
-//        JSplitPane pane = new JSplitPane(JSplitPane.VERTICAL_SPLIT,firstRow, secRow);
-//        pane.setDividerLocation(Main_Simulator.MAX_Y*SCALE / 2);
-//        add(pane);
+        members = new droneScreen[] {LeaderPanel, BehindLeaderPanel};//{SecondPanel, BehindLeaderPanel, LastPanel};
     }
 
     @Override
@@ -98,35 +51,75 @@ public class ScreensPanel extends JPanel {
         super.paintComponent(g);
 
         Graphics2D g2 = (Graphics2D) g;
-
-
-
         members[0].drawLeader(g2);
         drawDirection(g2);
 
-
-
         members[1].draw(g2);
-
-
 //        members[0].draw(g2,300,0);
 //        members[1].draw(g2,0,365);
 //        members[2].draw(g2,300,365);
-
     }
 
     private void drawDirection(Graphics2D g2) {
-        BufferedImage image = null;
+        BufferedImage image;
 
-
-        if(keyPressed.equals("VK_RIGHT")) {
-            try {
-                image = ImageIO.read(new File("/home/zahar/IdeaProjects/SwarmSimulatorG/src/gui/leaderDirection/rollRight.png"));
-                g2.drawImage(image, 250, 150, 100, 100, this);
-//                g2.drawString("roll right", 250,30);
-            } catch (IOException ex) {
-                // handle exception...
-            }
+        switch (keyPressed) {
+            case "rollRight":
+                try {
+                    image = ImageIO.read(new File("/home/zahar/IdeaProjects/SwarmSimulatorG/src/gui/leaderDirection/rollRight.png"));
+                    g2.drawImage(image, 200, 100, 200, 200, this);
+                } catch (IOException ex) {
+                    // handle exception...
+                }
+                break;
+            case "rollLeft":
+                try {
+                    image = ImageIO.read(new File("/home/zahar/IdeaProjects/SwarmSimulatorG/src/gui/leaderDirection/rollLeft.png"));
+                    g2.drawImage(image, 200, 100, 200, 200, this);
+                } catch (IOException ex) {
+                    // handle exception...
+                }
+                break;
+            case "pitchForward":
+                try {
+                    image = ImageIO.read(new File("/home/zahar/IdeaProjects/SwarmSimulatorG/src/gui/leaderDirection/pitchForward.png"));
+                    g2.drawImage(image, 200, 100, 200, 200, this);
+                } catch (IOException ex) {
+                    // handle exception...
+                }
+                break;
+            case "throttleDown":
+                try {
+                    image = ImageIO.read(new File("/home/zahar/IdeaProjects/SwarmSimulatorG/src/gui/leaderDirection/throttleDown.png"));
+                    g2.drawImage(image, 200, 100, 200, 200, this);
+                } catch (IOException ex) {
+                    // handle exception...
+                }
+                break;
+            case "throttleUp":
+                try {
+                    image = ImageIO.read(new File("/home/zahar/IdeaProjects/SwarmSimulatorG/src/gui/leaderDirection/throttleUp.png"));
+                    g2.drawImage(image, 200, 100, 200, 200, this);
+                } catch (IOException ex) {
+                    // handle exception...
+                }
+                break;
+            case "yawLeft":
+                try {
+                    image = ImageIO.read(new File("/home/zahar/IdeaProjects/SwarmSimulatorG/src/gui/leaderDirection/yawLeft.png"));
+                    g2.drawImage(image, 200, 100, 200, 200, this);
+                } catch (IOException ex) {
+                    // handle exception...
+                }
+                break;
+            case "yawRight":
+                try {
+                    image = ImageIO.read(new File("/home/zahar/IdeaProjects/SwarmSimulatorG/src/gui/leaderDirection/yawRight1.png"));
+                    g2.drawImage(image, 200, 100, 200, 200, this);
+                } catch (IOException ex) {
+                    // handle exception...
+                }
+                break;
         }
     }
 
@@ -161,57 +154,15 @@ public class ScreensPanel extends JPanel {
 
     }
 
-    public String getKeyPressed() {
-        return keyPressed;
-    }
-
     public void setKeyPressed(String keyPressed) {
         this.keyPressed = keyPressed;
     }
 
-    public AgentScreen[] getAgentPanelsArr (){
+    public droneScreen[] getAgentPanelsArr (){
         return members;
     }
 
-    public Dimension getLeaderLocation() {
-        return leaderLocation;
-    }
 
-    public void setLeaderLocation(Dimension leaderLocation) {
-        this.leaderLocation = leaderLocation;
-    }
-
-    public AgentScreen getLeaderPanel() {
-        return LeaderPanel;
-    }
-
-    public void setLeaderPanel(AgentScreen leaderPanel) {
-        LeaderPanel = leaderPanel;
-    }
-
-    public AgentScreen getSecondPanel() {
-        return SecondPanel;
-    }
-
-    public void setSecondPanel(AgentScreen secondPanel) {
-        SecondPanel = secondPanel;
-    }
-
-    public AgentScreen getBehindLeaderPanel() {
-        return BehindLeaderPanel;
-    }
-
-    public void setBehindLeaderPanel(AgentScreen behindLeaderPanel) {
-        BehindLeaderPanel = behindLeaderPanel;
-    }
-
-    public AgentScreen getLastPanel() {
-        return LastPanel;
-    }
-
-    public void setLastPanel(AgentScreen lastPanel) {
-        LastPanel = lastPanel;
-    }
 }
 
 

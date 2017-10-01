@@ -1,18 +1,13 @@
 package gui;
 
-import java.awt.Color;
-import java.awt.Dimension;
-import java.awt.Graphics;
-import java.awt.Graphics2D;
-import java.awt.Polygon;
-import java.util.Random;
-
-import javax.swing.JComponent;
-
 import simulation.Drone;
 
+import javax.swing.*;
+import java.awt.*;
+import java.util.Random;
+
 @SuppressWarnings("serial")
-class AgentComponent extends JComponent {
+class droneComponent extends JComponent {
 
 	private static final Random random = new Random();
 	private static final int SIZE = 2;
@@ -21,11 +16,9 @@ class AgentComponent extends JComponent {
 	private int shapeWidth = 10;
 	private Color agentColor;
 	private Drone.droneBehaviour currentBehaviour;
-	private int[] lastLocation;
 
-	AgentComponent(Drone drone) {
+	droneComponent(Drone drone) {
 		this.drone = drone;
-//		this.setSize(new Dimension(SIZE*SwarmPanel.SCALE,SIZE*SwarmPanel.SCALE));
 		this.setSize(new Dimension(10, 10));
 		this.setVisible(true);
 		decideAgentColor();
@@ -61,8 +54,6 @@ class AgentComponent extends JComponent {
 		setSize(new Dimension(drone.getHeight().getHeight(), drone.getHeight().getHeight()));
 		this.repaint();
 
-
-
 		int[] xs = shape.xpoints;
 		int[] ys = shape.ypoints;
 		xs[0] = getWidth() / 2;
@@ -73,31 +64,18 @@ class AgentComponent extends JComponent {
 		ys[2] = getHeight();
 	}
 
-//	private static Color giveMeAColor() {
-//		return new Color(getRandomRgb(),getRandomRgb(),getRandomRgb());
-//	}
-
 	public Drone getDrone() {
 		return drone;
 	}
-
-//	private static int getRandomRgb() {
-//		return random.nextInt(256);
-//	}
 
 	@Override
 	public void paintComponent(Graphics g) {
 		super.paintComponent(g);
 		Graphics2D g2 = (Graphics2D) g;
 
-		//g2.clearRect(0, 0, getWidth(), getHeight());
 		g2.setColor(agentColor);
-
-//		System.out.println("*********** drone.getAngle() : " + drone.getAngle());
 		g2.rotate(Math.toRadians(drone.getAngle()),
 				getWidth() / 2, getHeight() / 2);
-
 		g2.fill(shape);
-//		this.setSize(new Dimension(drone.getHeight().getHeight(),drone.getHeight().getHeight()));
 	}
 }

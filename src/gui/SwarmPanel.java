@@ -1,17 +1,16 @@
 package gui;
 
+import simulation.Drone;
+import simulation.Main_Simulator;
+
+import javax.swing.*;
+import javax.swing.border.BevelBorder;
+import javax.swing.border.Border;
 import java.awt.*;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.util.Timer;
 import java.util.TimerTask;
-
-import javax.swing.*;
-import javax.swing.border.BevelBorder;
-import javax.swing.border.Border;
-
-import simulation.Drone;
-import simulation.Main_Simulator;
 
 public class SwarmPanel extends JPanel implements KeyListener {
 
@@ -19,19 +18,12 @@ public class SwarmPanel extends JPanel implements KeyListener {
 	 *
 	 */
 	private static final long serialVersionUID = -8787570229900908897L;
-
-	private AgentComponent[] components;
+	private droneComponent[] components;
 	private ScreensPanel screens = ScreensPanel.getInstance();
 	private boolean running = false;
-
 	public static final int SCALE = 7;
-
 	private JLabel messageLabel = new JLabel();
-	//	private JPanel leaderPanel;
 	private JLabel leaderDirection;;
-	private int angle ;
-	private double hight;
-	private boolean isTurn = false;
 
 	public void stop() {
 		running = false;
@@ -44,51 +36,53 @@ public class SwarmPanel extends JPanel implements KeyListener {
 	}
 
 	public void init(Drone[] drones) {
+		final JFrame frame = new JFrame();
+		final JFrame sframe = new JFrame();
 
-		final Dimension sizeWithScreesns = new Dimension(Main_Simulator.MAX_X*SCALE + 600 , Main_Simulator.MAX_Y*SCALE );
-
+		final Dimension screensPanelSize = new Dimension( 600 , Main_Simulator.MAX_Y*SCALE );
 		final Dimension swarmPanelSize = new Dimension(Main_Simulator.MAX_X*SCALE , Main_Simulator.MAX_Y*SCALE );
 		setSize(swarmPanelSize);
 		setLayout(null);
 
 		messageLabel.setLocation(20, 20);
 		messageLabel.setSize(500, 50);
-		messageLabel.setText("SWARM simulation");
+		messageLabel.setText("Swarm simulation Panel");
 		add(messageLabel);
 
-//		screens = new ScreensPanel();
+		//screens frame
+		sframe.add(screens);
+		JLayer<Component> blurLayer = new JLayer<>(screens, new BlurLayerUI());
+		sframe.setVisible(true);
+		sframe.setContentPane(blurLayer);
+		sframe.setSize(screensPanelSize);
+		sframe.setLocation(0,0);
 
-		final JFrame frame = new JFrame();
-		frame.add(screens);
+		//simulation frame
 		frame.add(this);
 		frame.addKeyListener(this);
-		frame.setSize(sizeWithScreesns);
+		frame.setSize(swarmPanelSize);
 		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		frame.setVisible(true);
+		GraphicsEnvironment ge = GraphicsEnvironment.getLocalGraphicsEnvironment();
+		GraphicsDevice defaultScreen = ge.getDefaultScreenDevice();
+		Rectangle rect = defaultScreen.getDefaultConfiguration().getBounds();
+		int x = (int) rect.getMaxX() - frame.getWidth();
+		int y = 0;
+		frame.setLocation(x, y);
+
+
 		this.setOpaque(true);
 		Border border = BorderFactory.createBevelBorder(BevelBorder.LOWERED);
 		this.setBorder(border);
 
-		components = new AgentComponent[drones.length];
+		//init drone components
+		components = new droneComponent[drones.length];
 		for (int i = 0; i < components.length; i++) {
-			components[i] = new AgentComponent(drones[i]);
+			components[i] = new droneComponent(drones[i]);
 			add(components[i]);
 		}
 
-//		leaderPanel = screens.getLeaderPanel();
-		leaderDirection = new JLabel();;
-		Dimension screenLocation = screens.getLeaderLocation();
-		leaderDirection.setLocation((int)screenLocation.getWidth()+300,(int)screenLocation.getHeight()+450);
-//		leaderDirection.set
-		leaderDirection.setSize(100, 50);
-
-
-		angle = 0;
-		hight = 0;
-
-
 		startThread();
-
 	}
 
 	private void startThread() {
@@ -97,7 +91,7 @@ public class SwarmPanel extends JPanel implements KeyListener {
 			@Override
 			public void run() {
 				if (running) {
-					for (AgentComponent comp : components) {
+					for (droneComponent comp : components) {
 						comp.update();
 					};
 				} else {
@@ -108,106 +102,57 @@ public class SwarmPanel extends JPanel implements KeyListener {
 		}, 500, Main_Simulator.TIME_STEP);
 	}
 
-	public void message(String message) {
-		messageLabel.setText(message);
-		new Timer().schedule(new TimerTask() {
-			@Override
-			public void run() {
-				messageLabel.setText("");
-			}
-		}, 2000);
-	}
-
 	public ScreensPanel getScreens() {
 		return screens;
 	}
 
 
-	@Override
-	public void keyTyped(KeyEvent e) {
-
-	}
-
+	//key listeners
 	@Override
 	public void keyPressed(KeyEvent e) {
 		Drone leaderDrone = components[0].getDrone();
 
-		System.out.println("lalala");
-
 		if(e.getKeyCode() == KeyEvent.VK_T){
 			leaderDrone.setSideCommand(Drone.droneControl.TakeOf);
-//			screens.
-//			components[0].
 		}else if (e.getKeyCode() == KeyEvent.VK_L) {
 			leaderDrone.setSideCommand(Drone.droneControl.Land);
 		}else if (e.getKeyCode() == KeyEvent.VK_UP) {
 			leaderDrone.setSideCommand(Drone.droneControl.PitchForward);
-			leaderDirection.setText("\nFront key pressed");
+			screens.setKeyPressed("pitchForward");
 		}else if (e.getKeyCode() == KeyEvent.VK_RIGHT) {
 			leaderDrone.setSideCommand(Drone.droneControl.RollRight);
-			screens.setKeyPressed("VK_RIGHT");
+			screens.setKeyPressed("rollRight");
 		}else if (e.getKeyCode() == KeyEvent.VK_LEFT) {
 			leaderDrone.setSideCommand(Drone.droneControl.RollLeft);
-			leaderDirection.setText("\nLeft key pressed");
+			screens.setKeyPressed("rollLeft");
 		}else if (e.getKeyCode() == KeyEvent.VK_DOWN) {;
 			leaderDrone.setDirCommand(Drone.droneControl.Hover);
 			leaderDrone.setSideCommand(Drone.droneControl.Hover);
+			screens.setKeyPressed("stop");
 		}else if (e.getKeyCode() == KeyEvent.VK_D) {;
 			leaderDrone.setDirCommand(Drone.droneControl.YawRight);
-			leaderDirection.setText("\nYaw right");
+			screens.setKeyPressed("yawRight");
 		}else if (e.getKeyCode() == KeyEvent.VK_A) {
 			leaderDrone.setDirCommand(Drone.droneControl.YawLeft);
-			leaderDirection.setText("\nYaw left");
+			screens.setKeyPressed("yawLeft");
 		}else if (e.getKeyCode() == KeyEvent.VK_W) {
 			leaderDrone.setDirCommand(Drone.droneControl.ThrottleHigh);
-			leaderDirection.setText("\nUp key pressed");
+			screens.setKeyPressed("throttleUp");
 		}else if (e.getKeyCode() == KeyEvent.VK_S) {
 			leaderDrone.setDirCommand(Drone.droneControl.ThrottleLow);
-			leaderDirection.setText("\nDown key pressed");
+			screens.setKeyPressed("throttleDown");
 		}
-
-
-//		screens.getAgentPanelsArr()[0].setLeaderDir(leaderDirection);
-//		leaderPanel.add(leaderDirection);// TODO arrows
 	}
 
 	@Override
 	public void keyReleased(KeyEvent e) {
+		//nothing to do
+	}
 
-		Drone leaderDrone = components[0].getDrone();
-		leaderDrone.setDirCommand(Drone.droneControl.Hover);
 
-		if (e.getKeyCode() == KeyEvent.VK_D) {;
-
-		}else if (e.getKeyCode() == KeyEvent.VK_A) {
-//			components[1].update();
-		}
-		/*Drone leaderDrone = */
-//		if (e.getKeyCode() == KeyEvent.VK_D) {
-//			leaderDrone.setDirCommand(Drone.droneControl.Hover);
-//		}
-//		if (e.getKeyCode() == KeyEvent.VK_A) {
-//			leaderDrone.setDirCommand(Drone.droneControl.Hover);
-//		}
-//		if (e.getKeyCode() == KeyEvent.VK_W) {
-//			leaderDrone.setDirCommand(Drone.droneControl.Hover);
-//
-//			leaderDirection.setText("\n" + hight + " meters");
-//		}
-//		if (e.getKeyCode() == KeyEvent.VK_S) {
-//			leaderDirection.setText("\n" + hight + " meters");
-//		}
-//
-//		leaderDrone.setDirCommand(Drone.droneControl.Hover);
-//
-//		new Timer().schedule(new TimerTask() {
-//			@Override
-//			public void run() {
-//				leaderDirection.setText("");
-//			}
-//		}, 5000);
-//
-//		hight = 0;
+	@Override
+	public void keyTyped(KeyEvent e) {
+		//nothing to do
 	}
 
 }

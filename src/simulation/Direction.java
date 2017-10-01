@@ -31,10 +31,6 @@ public class Direction {
 		return angle;
 	}
 
-	public void setAngle(int angle) {
-		this.angle = sanitizeAngle(angle);
-	}
-
 	private int sanitizeAngle(int angle) {
 		return angle < 0 ? 360 + angle%360 : angle%360;
 	}

@@ -1,10 +1,11 @@
 package simulation;
 
-import gui.AgentScreen;
 import gui.ScreensPanel;
-import gui.SwarmPanel;
-
+import gui.droneScreen;
 import simulation.util.Vector2D;
+
+import java.util.LinkedList;
+import java.util.Queue;
 
 public class Drone {
 
@@ -14,15 +15,16 @@ public class Drone {
 		ThrottleHigh , ThrottleLow , YawLeft , YawRight , Land, TakeOf, Hover}
 	public enum droneState {Flying, Landed}
 
-	private static final int INERTIA = 3;
-	private static final int REACH = 20;
-	private static final int AGENT_SIZE = SwarmPanel.SCALE;
 	double x;
 	double y;
 	private Direction direction;
 	private Height height;
 	private droneBehaviour behaviour;
 	private droneState state = droneState.Landed;
+
+	private Queue<droneControl[]> commands;
+	private Queue<String[]> queue;
+
 
 	private droneControl sideCommand;//Pith, Roll
 	private droneControl dirCommand;//Yaw, Throttle
@@ -33,7 +35,6 @@ public class Drone {
 	private droneCycle backMemberCycle = new IrFrontCycle();
 
 
-	//	private static Main_Simulator sim = Main_Simulator.getInstance();
 	private static ScreensPanel screensPanel = ScreensPanel.getInstance();
 
 	public Drone(droneBehaviour behaviour, Direction direction, Height height, int x, int y) {
@@ -44,10 +45,9 @@ public class Drone {
 		this.height = height;
 		this.sideCommand = droneControl.Hover;
 		this.dirCommand = droneControl.Hover;
-
-		// *  ^
-		// ^  ^
-		//
+		this.commands = new LinkedList<>();
+		this.commands.add(new droneControl[]{sideCommand,dirCommand});
+		this.queue = new LinkedList<>();
 	}
 
 	public droneBehaviour getAgentBehaviour() {
@@ -63,8 +63,6 @@ public class Drone {
 	private void land() {
 		height.setHeight(15);
 	}
-
-
 
 	private void goAhead() {
 		System.out.println("direction :" + direction);
@@ -89,11 +87,7 @@ public class Drone {
 			angle = Math.toRadians(direction.getAngle() - 90);
 		}else if(side.equals("right")){
 			angle = Math.toRadians(direction.getAngle() + 90);
-		}/*else if(side.equals("leftY")){
-			angle = Math.toRadians(direction.getAngle() - 45);
-		}else if(side.equals("rightY")){
-			angle = Math.toRadians(direction.getAngle() + 45);
-		}*/else{
+		}else{
 			angle = Math.toRadians(direction.getAngle());
 		}
 
@@ -129,18 +123,6 @@ public class Drone {
 		return height;
 	}
 
-	public void setHeight(Height height) {
-		this.height = height;
-	}
-
-	public Direction getDirection() {
-		return direction;
-	}
-
-	public void setDirection(double angle) {
-		this.direction = new Direction(angle);
-	}
-
 	public String toString() {
 		return "X=" + x + " Y=" + y + " D=" + direction.getAngle() +
 				" , behaviour= " + behaviour + ", sideCommand=" + sideCommand + ", dirCommand=" + dirCommand + ", agentState=" +state;
@@ -154,16 +136,22 @@ public class Drone {
 		this.dirCommand = dirCommand;
 	}
 
+
+
+
+
+	// drones daily cycle
 	public void dailyCycle() {
 		switch(behaviour) {
-			case SWARM_LEADER:leaderCycle.dailyCycle(); break;
-			case FOLLOW_FRONT_IR: backMemberCycle.dailyCycle(); break;
+			case SWARM_LEADER:leaderCycle.droneCycle(); break;
+			case FOLLOW_FRONT_IR: backMemberCycle.droneCycle(); break;
 		}
 	}
 
 	private interface droneCycle {
-		void dailyCycle();
+		void droneCycle();
 	}
+
 
 	/**
 	 * leader cycle
@@ -172,8 +160,8 @@ public class Drone {
 	public class ByPressCycle implements droneCycle {
 
 		@Override
-		public void dailyCycle() {
-			AgentScreen[] screensToUpdate = new AgentScreen[]{screensPanel.getAgentPanelsArr()[1]};
+		public void droneCycle() {
+			droneScreen[] screensToUpdate = new droneScreen[]{screensPanel.getAgentPanelsArr()[1]};
 
 //			if(state.equals(droneState.Flying)) {
 			if (sideCommand.equals(droneControl.PitchForward)) {
@@ -199,54 +187,65 @@ public class Drone {
 //			}
 
 
-
 			if (dirCommand.equals(droneControl.YawRight)) {
 				direction.turn(5);
 			} else if (dirCommand.equals(droneControl.YawLeft)) {
 				direction.turn(-5);
 			} else if (dirCommand.equals(droneControl.ThrottleHigh)) {
-//				if(!height.incHeight())
+				if(!height.incHeight())
 					dirCommand = droneControl.Hover;
 			} else if (dirCommand.equals(droneControl.ThrottleLow)) {
-//				if(!height.decHeight())
+				if(!height.decHeight())
 					dirCommand = droneControl.Hover;
 			}
 
-			//update the IR points in the follower screen
-			updateFollowersScreen(screensToUpdate, sideCommand, dirCommand);
+			commands.add(new droneControl[]{sideCommand,dirCommand});
+			updateFollowersScreen(screensToUpdate, commands);
+			dirCommand = droneControl.Hover;
 		}
 
 	}
-
-
 
 	public class IrFrontCycle implements droneCycle {
 
 		@Override
-		public void dailyCycle() {
-			AgentScreen secRowsPanel = screensPanel.getAgentPanelsArr()[1];
-			System.out.println(secRowsPanel);
+		public void droneCycle() {
+			droneScreen screen = screensPanel.getAgentPanelsArr()[1];
+			System.out.println(screen);
 
-			String[] findIR = screensPanel.findIRpos(secRowsPanel.getCameraSide());
+			String[] findIR = screensPanel.findIRpos(screen.getCameraSide());
 
-			followIRpoints(findIR);
-			updateSelfScreen(secRowsPanel);
+//			queue.add(findIR);
+//			if(queue.size() > 1){
+				followIRpoints(findIR);
+				updateSelfScreen(screen);
+//			}
+
 		}
 	}
-
 
 	/**
 	 * update the IR points in the follower screen by the direction and the side commands
 	 * @param screensToUpdate
-	 * @param sideCommand
-	 * @param dirCommand
+	 * @param commands
 	 */
-	private void updateFollowersScreen(AgentScreen[] screensToUpdate, droneControl sideCommand, droneControl dirCommand) {
+	private void updateFollowersScreen(droneScreen[] screensToUpdate, Queue<droneControl[]> commands) {
 		int xdiff = screensToUpdate[0].getDiffX();
 		int dimdiff = screensToUpdate[0].getDiffDim();
 		int ydiff = screensToUpdate[0].getDiffY();
 
-		switch (sideCommand) {
+		droneControl side = droneControl.Hover;
+		droneControl direction = droneControl.Hover;
+
+		System.out.println(commands.size());
+
+		if(commands.size() > 2) {
+			droneControl[] currCommand = commands.poll();
+			side = currCommand[0];
+			direction = currCommand[1];
+		}
+
+		switch (side) {
 			case PitchForward:
 				screensToUpdate[0].setCurrIRdim(screensToUpdate[0].getCurrIRdim() - dimdiff);
 				break;
@@ -263,7 +262,7 @@ public class Drone {
 				break;
 		}
 
-		switch (dirCommand) {
+		switch (direction) {
 			case YawRight:
 				if(screensToUpdate[0].getCurrIRslop_1() > 0 && screensToUpdate[0].getCurrIRslop_2() > 0) {
 					screensToUpdate[0].setCurrIRslop_1((int) (screensToUpdate[0].getCurrIRslop_1() / 1.5));
@@ -309,7 +308,10 @@ public class Drone {
 				break;
 		}
 
+//		screensPanel.setVisible(true);
 		screensPanel.repaintPoints();
+
+
 
 	}
 
@@ -357,7 +359,7 @@ public class Drone {
 //		}
 	}
 
-	private void updateSelfScreen(AgentScreen memberPanel) {
+	private void updateSelfScreen(droneScreen memberPanel) {
 //		if(sideCommand.equals(droneControl.TakeOf)){
 //			memberPanel.setCurrY_1(memberPanel.getY_1());
 //			memberPanel.setCurrY_2(memberPanel.getY_2());

@@ -1,12 +1,13 @@
 package simulation;
 
 import gui.SwarmPanel;
-
-import java.util.*;
-
-import javax.swing.SwingUtilities;
-
 import simulation.util.Vector2D;
+
+import javax.swing.*;
+import java.util.Calendar;
+import java.util.GregorianCalendar;
+import java.util.HashSet;
+import java.util.Set;
 
 public class Main_Simulator implements Runnable {
 
@@ -33,9 +34,7 @@ public class Main_Simulator implements Runnable {
 	private Calendar today = new GregorianCalendar(2011, Calendar.MARCH, 13);
 	private final Calendar LAST_DAY = new GregorianCalendar(2015, Calendar.MARCH, 24);
 
-
 	private static final Main_Simulator sim = new Main_Simulator();
-
 	private Drone[] drones = new Drone[N_OF_AGENTS];
 
 	private Main_Simulator() {}
@@ -94,20 +93,11 @@ public class Main_Simulator implements Runnable {
 	public void run() {
 
 		printAgents();
-
 //		printGrid();
-
 		Vector2D tmpPos = new Vector2D();
-
-		boolean[] respond = new boolean[3];
-		for (int i = 0; i < respond.length; i++) {
-			respond[i] = false;
-		}
 
 		while (today.before(LAST_DAY)) {//while(true){
 			System.out.println();
-
-			//print grid
 			for (int i = 0; i < grid.length; i++) {
 				for (int j = 0; j < grid[i].length; j++) {
 					if(grid[i][j] != null) System.out.println("i:" + i +", j:" +j + ": (" + grid[i][j]+")");
@@ -119,11 +109,8 @@ public class Main_Simulator implements Runnable {
 				tmpPos.y = drone.y;
 
 				if(panel != null && panel.getScreens() != null && panel.getScreens().getAgentPanelsArr() != null) {
-
-					//the main function of the drones movemant
-					drone.dailyCycle();
+					drone.dailyCycle();//the main function of the drones movemant
 				}
-
 
 				if (!drone.getPos().equals(tmpPos)) ensureAgentInValidPos(tmpPos, drone);
 			}
@@ -134,17 +121,13 @@ public class Main_Simulator implements Runnable {
 			try {
 				Thread.sleep(TIME_STEP);
 			} catch (InterruptedException e) {
-				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
 		}
 
 		panel.stop();
-
 		System.out.println("END");
-
 		printGrid();
-
 	}
 
 	private void ensureAgentInValidPos(Vector2D oldPos, Drone drone) {
@@ -168,10 +151,6 @@ public class Main_Simulator implements Runnable {
 		}
 	}
 
-	public void message(String message) {
-		System.out.println(message);
-		panel.message(message);
-	}
 
 	private void printGrid() {
 		int count = 0;

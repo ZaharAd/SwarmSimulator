@@ -1,59 +1,37 @@
 package gui;
 
-import javax.imageio.ImageIO;
+import javax.swing.*;
 import java.awt.*;
 import java.awt.image.BufferedImage;
-import java.io.File;
-import java.io.IOException;
 
 /**
  * Created by zahar on 16/06/17.
  */
 
-public class AgentScreen {
+public class droneScreen extends JFrame{
     private final int IRdim = 7;
-
-    //    private final int X_1 = 150, Y_1 = 100;// first IR point
-    //    private final int X_2 = 150, Y_2 = 200;// second IR point
-
     private int b1,b2;
     private final int X_1 = 295, Y_1 = 100;// first IR point
     private final int X_2 = 295, Y_2 = 200;// second IR point
-    private final int Z = 0 ;//, Z_2 = 0;
-
-    private final int diffDim = 2 , diffX = 15 , diffY = 15;
-    private String cameraSide;
-
-
-    private String side = "";
-    private String dir = "";
-
     private int currX_1 = X_1 , currY_1 = Y_1, currX_2 = X_2, currY_2 = Y_2;
     private int currIRdim = IRdim;
     private int currIRslop_1 = currIRdim;
     private int currIRslop_2 = currIRdim;
-    private int currZ = Z;//, currZ_2 = Z_2;
-    private int turn = 0; // 1 - right, -1 - left
 
-    public void drawDirection() {
+    private final int diffDim = 2 , diffX = 15 , diffY = 15;
+    private String cameraSide;
+    private String side = "";
+    private String dir = "";
 
-    }
 
-    public void draw(Graphics2D g2) {
+    void draw(Graphics2D g2) {
         int x,y;
         int[] xs,ys;
-
-
         g2.drawRect(0,365,600,365);
-//        g2.setColor(Color.WHITE);
-//        g2.fillRect(0,365,600,365);
-
 
         int i = 0, i1=365;
-
-        b1 = i ;
+        b1 = i;
         b2 = i1;
-
 
         g2.setColor(Color.RED);
 
@@ -75,23 +53,15 @@ public class AgentScreen {
         g2.drawPolygon(xs,ys,xs.length);
         g2.fillPolygon(xs,ys,xs.length);
 
-
-        //TODO add gausyan noise
-
-
     }
 
-    public void drawLeader(Graphics2D g2) {
+    void drawLeader(Graphics2D g2) {
         b1 = 600;
         b2 = 365;
 
         g2.drawRect(0,0,b1,b2);
         g2.setColor(Color.ORANGE);
-//        g2.drawString("lalalla",50,50);
         g2.fillRect(0,0,b1,b2);
-
-
-
     }
 
 
@@ -122,6 +92,7 @@ public class AgentScreen {
         int point_x1 = i + X_1 - IRdim , point_x2 = i + X_2 - IRdim;
         int point_y1 = i1 + Y_1 - IRdim , point_y2 = i1 + Y_2 - IRdim;
 
+        //find the side
         if ((currPointColor(img,point_x1 ,point_y1).equals(Color.BLACK))
                 && (currPointColor(img,point_x2 ,point_y2)).equals(Color.BLACK)
                 && (currPointColor(img,point_x1 + diffX,point_y1)).equals(Color.RED)
@@ -146,6 +117,7 @@ public class AgentScreen {
         }
 
 
+        //find the direction
         if((currPointColor(img,point_x1 ,point_y1)).equals(Color.BLACK)
                 &&(currPointColor(img,point_x2 ,point_y2)).equals(Color.BLACK)
                 &&(currPointColor(img,point_x1 ,point_y1 - diffY).equals(Color.RED))
@@ -317,14 +289,6 @@ public class AgentScreen {
         }
     }
 
-    public int getTurn() {
-        return turn;
-    }
-
-    public void setTurn(int turn) {
-        this.turn = turn;
-    }
-
     public int getY_1() {
         return Y_1;
     }
@@ -345,31 +309,18 @@ public class AgentScreen {
         return diffY;
     }
 
-    public int getZ() {
-        return Z;
-    }
-
-    public int getCurrZ() {
-        return currZ;
-    }
-
-    public void setCurrZ(int currZ) {
-        this.currZ = currZ;
-    }
-
     public String getCameraSide() {
         return cameraSide;
     }
 
     @Override
     public String toString() {
-        return "AgentScreen{" +
+        return "droneScreen{" +
                 "IRdim=" + IRdim +
                 ", currX_1=" + currX_1 +
                 ", currY_1=" + currY_1 +
                 ", currX_2=" + currX_2 +
                 ", currY_2=" + currY_2 +
-                ", currZ=" + currZ +
                 ", currIRdim=" + currIRdim +
                 ", side='" + side + '\'' +
                 ", dir='" + dir + '\'' +

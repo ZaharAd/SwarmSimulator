@@ -25,7 +25,7 @@ hs_err_pid*
 machineLearningEx3.iml
 out/
 # IntelliJ
-/out/
+libs/
 
 .idea_modules/
 atlassian-ide-plugin.xml
