@@ -34,7 +34,6 @@ public class Drone {
 	private droneCycle leaderCycle = new ByPressCycle();
 	private droneCycle backMemberCycle = new IrFrontCycle();
 
-
 	private static ScreensPanel screensPanel = ScreensPanel.getInstance();
 
 	public Drone(droneBehaviour behaviour, Direction direction, Height height, int x, int y) {
