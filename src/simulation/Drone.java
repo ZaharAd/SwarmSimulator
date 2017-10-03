@@ -55,9 +55,9 @@ public class Drone {
 
 
 
-	private void takeOf() {
-		height.setHeight(20);
-	}
+//	private void takeOf() {
+//		height.setHeight(20);
+//	}
 
 	private void land() {
 		height.setHeight(15);
