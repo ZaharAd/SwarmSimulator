@@ -1,15 +1,19 @@
 package simulation;
 
+import gui.BlurLayerUI;
+import gui.ScreensPanel;
 import gui.SwarmPanel;
 import simulation.util.Vector2D;
+import simulation.util.keyPress;
 
 import javax.swing.*;
+import java.awt.*;
 import java.util.Calendar;
 import java.util.GregorianCalendar;
 import java.util.HashSet;
 import java.util.Set;
 
-public class Main_Simulator implements Runnable {
+public class Main_Simulator implements Runnable  {
 
 
 	public static void main(String[] args) {
@@ -26,16 +30,20 @@ public class Main_Simulator implements Runnable {
 	public static final int TIME_STEP = 50;
 	public static final int MAX_X = 100;
 	public static final int MAX_Y = 100;
-	public static final int N_OF_AGENTS = 2;
+	public static final int N_OF_MEMBERS = 4;
+	public static final int SCALE = 7;
+
 
 	private SwarmPanel panel;
+	private ScreensPanel screens ;
+
 
 	private static Drone[][] grid;
 	private Calendar today = new GregorianCalendar(2011, Calendar.MARCH, 13);
 	private final Calendar LAST_DAY = new GregorianCalendar(2015, Calendar.MARCH, 24);
 
 	private static final Main_Simulator sim = new Main_Simulator();
-	private Drone[] drones = new Drone[N_OF_AGENTS];
+	private Drone[] drones = new Drone[N_OF_MEMBERS];
 
 	private Main_Simulator() {}
 
@@ -55,25 +63,28 @@ public class Main_Simulator implements Runnable {
 		Vector2D startPoint = new Vector2D(10, MAX_Y -20);
 
 		//leader
-		// *
-		// -
+		// *  -
+		// -  -
 		drones[i++] = grid[startPoint.getX()][startPoint.getY()] = new Drone(
-				Drone.droneBehaviour.SWARM_LEADER,
-				new Direction(0),
-				new Height(15),
-				startPoint.getX(),
-				startPoint.getY()
-		);
+				Drone.droneBehaviour.SWARM_LEADER,new Direction(0),new Height(15),startPoint.getX(),startPoint.getY());
+
 		//behind leader
-		// -
-		// *
-		drones[i] = grid[startPoint.getX()][startPoint.getY() + 10] = new Drone(
-				Drone.droneBehaviour.FOLLOW_FRONT_IR,
-				new Direction(0),
-				new Height(15),
-				startPoint.getX(),
-				startPoint.getY() + 10
-		);
+		// -  -
+		// *  -
+		drones[i++] = grid[startPoint.getX()][startPoint.getY() + 10] = new Drone(
+				Drone.droneBehaviour.FOLLOW_FRONT_IR,new Direction(0),new Height(15),startPoint.getX(),startPoint.getY() + 10);
+
+		//beside leader
+		// -  *
+		// -  -
+		drones[i++] = grid[startPoint.getX() + 10][startPoint.getY()] = new Drone(
+				Drone.droneBehaviour.FOLLOW_LEFT_IR,new Direction(0),new Height(15),startPoint.getX() + 10,startPoint.getY());
+
+		//behind beside leader
+		// -  -
+		// -  *
+		drones[i] = grid[startPoint.getX() + 10][startPoint.getY() + 10] = new Drone(
+				Drone.droneBehaviour.FOLLOW_FRONT_IR,new Direction(0),new Height(15),startPoint.getX() + 10,startPoint.getY() + 10);
 	}
 
 
@@ -86,6 +97,40 @@ public class Main_Simulator implements Runnable {
 			public void run() {
 				panel = new SwarmPanel();
 				panel.init(drones);
+				screens = ScreensPanel.getInstance();
+
+
+				keyPress keyPress = new keyPress(panel,screens);
+
+				final JFrame frame = new JFrame();
+				final JFrame screensFrame = new JFrame();
+
+				final Dimension screensPanelSize = new Dimension( 600 , Main_Simulator.MAX_Y*SCALE );
+				final Dimension swarmPanelSize = new Dimension(Main_Simulator.MAX_X*SCALE , Main_Simulator.MAX_Y*SCALE );
+
+				//screens frame
+				screensFrame.add(screens);
+				JLayer<Component> blurLayer = new JLayer<>(screens, new BlurLayerUI());
+				screensFrame.setContentPane(blurLayer);
+				screensFrame.setVisible(true);
+				screensFrame.setSize(screensPanelSize);
+				screensFrame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+				screensFrame.setLocation(0,0);
+
+
+
+				//simulation frame
+//				frame.setLayout(new GridLayout(1,2));
+				frame.add(panel);
+//				frame.add(screens);
+				frame.addKeyListener(keyPress);
+				frame.setVisible(true);
+				frame.setSize(Main_Simulator.MAX_X*SCALE, Main_Simulator.MAX_Y*SCALE);
+				frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+				frame.setLocationRelativeTo(null);
+				frame.setLocation(0,0);
+
+
 			}
 		});
 	}
@@ -108,7 +153,7 @@ public class Main_Simulator implements Runnable {
 				tmpPos.x = drone.x;
 				tmpPos.y = drone.y;
 
-				if(panel != null && panel.getScreens() != null && panel.getScreens().getAgentPanelsArr() != null) {
+				if(panel != null && screens != null && screens.getMemberScreens() != null) {
 					drone.dailyCycle();//the main function of the drones movemant
 				}
 
@@ -161,7 +206,7 @@ public class Main_Simulator implements Runnable {
 			}
 			System.out.println();
 		}
-		if (count != N_OF_AGENTS) System.err.println("ERROR: Count is " + count);
+		if (count != N_OF_MEMBERS) System.err.println("ERROR: Count is " + count);
 	}
 
 	private void printAgents() {
@@ -169,5 +214,7 @@ public class Main_Simulator implements Runnable {
 			System.out.println(drone);
 		}
 	}
+
+
 
 }

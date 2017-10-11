@@ -7,7 +7,7 @@ import java.awt.*;
 import java.util.Random;
 
 @SuppressWarnings("serial")
-class droneComponent extends JComponent {
+public class droneComponent extends JComponent {
 
 	private static final Random random = new Random();
 	private static final int SIZE = 2;
@@ -33,7 +33,7 @@ class droneComponent extends JComponent {
 			case SWARM_LEADER:
 				this.agentColor = Color.RED;
 				break;
-			case FOLLOW_LEFT:
+			case FOLLOW_LEFT_IR:
 				this.agentColor = Color.BLACK;
 				break;
 			case FOLLOW_FRONT_IR:
@@ -46,9 +46,7 @@ class droneComponent extends JComponent {
 	}
 
 	void update() {
-		if (drone.getAgentBehaviour() != currentBehaviour) {
-			decideAgentColor();
-		}
+
 		currentBehaviour = drone.getAgentBehaviour();
 		setLocation(drone.getX() * SwarmPanel.SCALE, drone.getY() * SwarmPanel.SCALE);
 		setSize(new Dimension(drone.getHeight().getHeight(), drone.getHeight().getHeight()));

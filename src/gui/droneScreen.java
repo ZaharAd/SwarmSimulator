@@ -1,6 +1,5 @@
 package gui;
 
-import javax.swing.*;
 import java.awt.*;
 import java.awt.image.BufferedImage;
 
@@ -8,11 +7,10 @@ import java.awt.image.BufferedImage;
  * Created by zahar on 16/06/17.
  */
 
-public class droneScreen extends JFrame{
+public class droneScreen{
     private final int IRdim = 7;
-    private int b1,b2;
-    private final int X_1 = 295, Y_1 = 100;// first IR point
-    private final int X_2 = 295, Y_2 = 200;// second IR point
+    private final int X_1 = 150, Y_1 = 100;// first IR point
+    private final int X_2 = 150, Y_2 = 200;// second IR point
     private int currX_1 = X_1 , currY_1 = Y_1, currX_2 = X_2, currY_2 = Y_2;
     private int currIRdim = IRdim;
     private int currIRslop_1 = currIRdim;
@@ -24,48 +22,62 @@ public class droneScreen extends JFrame{
     private String dir = "";
 
 
-    void draw(Graphics2D g2) {
+    void draw(Graphics2D g2, int i, int i1) {
         int x,y;
-        int[] xs,ys;
-        g2.drawRect(0,365,600,365);
-
-        int i = 0, i1=365;
-        b1 = i;
-        b2 = i1;
+        g2.setColor(Color.WHITE);
+        g2.drawRect(i,i1,i+300,i1+365);
 
         g2.setColor(Color.RED);
 
         //first point
-        y = i1 + currY_1;
         x = i + currX_1;
-        xs = new int[]{x - currIRdim, x - currIRdim, x + currIRdim, x + currIRdim};
-        ys = new int[]{y + currIRslop_1, y - currIRslop_1, y - currIRslop_2, y + currIRslop_2};
-
-        g2.drawPolygon(xs,ys,xs.length);
-        g2.fillPolygon(xs,ys,xs.length);
+        y = i1 + currY_1;
+        drawIRpoint(x,y,g2);
 
         //second point
-        y = i1 + currY_2;
         x = i + currX_2;
-        xs = new int[]{x - currIRdim,x - currIRdim,x + currIRdim,x + currIRdim};
-        ys = new int[]{y + currIRslop_1, y - currIRslop_1, y - currIRslop_2, y + currIRslop_2};
+        y = i1 + currY_2;
+        drawIRpoint(x,y,g2);
+    }
 
-        g2.drawPolygon(xs,ys,xs.length);
-        g2.fillPolygon(xs,ys,xs.length);
+    private void drawIRpoint(int x, int y, Graphics2D g2) {
+        int[] xs,ys;
 
+//        System.out.println("x - currIRdim:" + (x - currIRdim) + ",x - currIRdim:" + (x - currIRdim) +",x + currIRdim:"
+//                + (x + currIRdim)+",x + currIRdim:" + (x + currIRdim));
+//
+//        System.out.println("y + currIRslop_1:" + (y + currIRslop_1)+ ", y - currIRslop_1:"+ (y - currIRslop_1)
+//                +",y - currIRslop_2:"+(y - currIRslop_2)+",y + currIRslop_2:"+ (y + currIRslop_2));
+
+
+
+//        if ((x != x1 && x != x2 && x != x3 && x != x4) && (y != y1 && y != y2 && y != y3 && y != y4)) {
+        if(currIRdim >= 0 && currIRslop_1 >= 0 && currIRslop_2 >= 0){
+            int x1 = x - currIRdim, y1 = y + currIRslop_1;
+            int x2 = x - currIRdim, y2 = y - currIRslop_1;
+            int x3 = x + currIRdim, y3 = y - currIRslop_2;
+            int x4 = x + currIRdim, y4 = y + currIRslop_2;
+
+            xs = new int[]{x1, x2, x3, x4};
+            ys = new int[]{y1, y2, y3, y4};
+
+            g2.drawPolygon(xs,ys,xs.length);
+            g2.fillPolygon(xs,ys,xs.length);
+        }
     }
 
     void drawLeader(Graphics2D g2) {
-        b1 = 600;
-        b2 = 365;
+        int b1 = 300;
+        int b2 = 365;
 
-        g2.drawRect(0,0,b1,b2);
+//        g2.drawRect(0,0,b1,b2);
         g2.setColor(Color.ORANGE);
         g2.fillRect(0,0,b1,b2);
+
     }
 
 
-    public String firstRowReading(BufferedImage img) {
+    public String findIRleft(BufferedImage img) {
         int i = 300 , i1 = 0;
 
         if ((new Color(img.getRGB(i + X_1 - IRdim ,i1 + Y_1 - IRdim)).equals(Color.BLACK))
@@ -88,10 +100,12 @@ public class droneScreen extends JFrame{
         return side;
     }
 
-    public String[] secRowReading(BufferedImage img, int i, int i1) {
+    public String[] findIRfront(BufferedImage img, int i, int i1) {
+
         int point_x1 = i + X_1 - IRdim , point_x2 = i + X_2 - IRdim;
         int point_y1 = i1 + Y_1 - IRdim , point_y2 = i1 + Y_2 - IRdim;
 
+//        System.out.println("============color:" + (currPointColor(img,point_x1 ,point_y1)));
         //find the side
         if ((currPointColor(img,point_x1 ,point_y1).equals(Color.BLACK))
                 && (currPointColor(img,point_x2 ,point_y2)).equals(Color.BLACK)
@@ -112,6 +126,11 @@ public class droneScreen extends JFrame{
                 && (currPointColor(img,point_x1 + diffDim,point_y1 + diffDim)).equals(Color.RED)
                 && (currPointColor(img,point_x2 + diffDim,point_y2 + diffDim)).equals(Color.RED)){
             side = "front";
+        }else if ((currPointColor(img,point_x1 ,point_y1).equals(Color.RED))
+                && (currPointColor(img,point_x2 ,point_y2)).equals(Color.RED)
+                && (currPointColor(img,point_x1 - diffDim,point_y1)).equals(Color.RED)
+                && (currPointColor(img,point_x2 - diffDim,point_y2)).equals(Color.RED)){
+            side =  "back";
         }else {
             side =  "stop";
         }
@@ -164,7 +183,7 @@ public class droneScreen extends JFrame{
                 && (currPointColor(img ,point_x1 + IRdim *2 ,point_y1)).equals(Color.RED)
                 && (currPointColor(img ,point_x2 + IRdim *2 ,point_y2)).equals(Color.RED)){
             dir = "right";
-            }else if((currPointColor(img ,point_x1 + IRdim *2 ,point_y1)).equals(Color.BLACK)
+        }else if((currPointColor(img ,point_x1 + IRdim *2 ,point_y1)).equals(Color.BLACK)
                 && (currPointColor(img ,point_x2 + IRdim *2 ,point_y2)).equals(Color.BLACK)
                 && (currPointColor(img ,point_x1 ,point_y1)).equals(Color.RED)
                 && (currPointColor(img ,point_x2 ,point_y2)).equals(Color.RED)){
@@ -199,6 +218,8 @@ public class droneScreen extends JFrame{
         }*/else {
             dir =  "stop";
         }
+
+        System.out.println("side,dir : " + side + "," + dir);
 
         return new String[]{side,dir};
     }
@@ -284,9 +305,7 @@ public class droneScreen extends JFrame{
     }
 
     public void setCurrY_1(int currY_1) {
-        if(currY_1 < b2){
-            this.currY_1 = currY_1;
-        }
+        this.currY_1 = currY_1;
     }
 
     public int getY_1() {
