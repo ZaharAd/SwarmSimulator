@@ -8,6 +8,8 @@ import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 
 import static gui.SwarmPanel.SCALE;
 
@@ -16,46 +18,31 @@ import static gui.SwarmPanel.SCALE;
  */
 public class ScreensPanel extends JPanel {
 
-    private droneScreen LeaderPanel;
-    private droneScreen BehindLeaderPanel;
-    private droneScreen BesideLeaderPanel;
-    private droneScreen BehindBesideLeaderPanel;
-
-    private static droneScreen[] memberScreens;
-    private Dimension leaderLocation;//, secondLocation, behindeLocation, lastLocation;
-    private String keyPressed = "";
-
     private static final ScreensPanel screens = new ScreensPanel();
+    private static droneScreen[] memberScreens;
+    private String keyPressed = "";
 
     public static ScreensPanel getInstance() {
         if(memberScreens == null) screens.init();
         return screens;
     }
 
-
     private void init() {
-//        leaderLocation = new Dimension(Main_Simulator.MAX_X*SCALE +10, 0);
-
         final Dimension size = new Dimension(600, Main_Simulator.MAX_Y*SCALE);
         setLayout(new GridLayout());
         setSize(size);
         setBounds(0, 0, Main_Simulator.MAX_X*SCALE + 600  , Main_Simulator.MAX_Y*SCALE);
-
-
         setBackground(Color.black);
 
-        LeaderPanel = new droneScreen();
+        droneScreen leaderPanel = new droneScreen();
+        droneScreen behindLeaderPanel = new droneScreen();
+        behindLeaderPanel.setCameraSide("frontL");
+        droneScreen besideLeaderPanel = new droneScreen();
+        besideLeaderPanel.setCameraSide("left");
+        droneScreen lastPanel = new droneScreen();
+        lastPanel.setCameraSide("frontR");
 
-        BehindLeaderPanel = new droneScreen();
-        BehindLeaderPanel.setCameraSide("frontL");
-
-        BesideLeaderPanel = new droneScreen();
-        BesideLeaderPanel.setCameraSide("left");
-
-        BehindBesideLeaderPanel = new droneScreen();
-        BehindBesideLeaderPanel.setCameraSide("front");
-
-        memberScreens = new droneScreen[] {LeaderPanel, BehindLeaderPanel,BesideLeaderPanel, BehindBesideLeaderPanel};
+        memberScreens = new droneScreen[] {leaderPanel, behindLeaderPanel, besideLeaderPanel, lastPanel};
     }
 
 
@@ -70,70 +57,23 @@ public class ScreensPanel extends JPanel {
         memberScreens[1].draw(g2,0,365);
         memberScreens[2].draw(g2,300,0);
         memberScreens[3].draw(g2,300,365);
-//        g2.dispose();
     }
 
     private void drawDirection(Graphics2D g2) {
-        BufferedImage image;
+        BufferedImage image = null;
+        Path currentRelativePath = Paths.get("");
+        String projPath = currentRelativePath.toAbsolutePath().toString();
 
-        switch (keyPressed) {
-            case "rollRight":
-                try {
-                    image = ImageIO.read(new File("/home/zahar/IdeaProjects/SwarmSimulatorG/src/gui/leaderDirection/rollRight.png"));
-                    g2.drawImage(image, 50, 100, 200, 150, this);
-                } catch (IOException ex) {
-                    // handle exception...
-                }
-                break;
-            case "rollLeft":
-                try {
-                    image = ImageIO.read(new File("/home/zahar/IdeaProjects/SwarmSimulatorG/src/gui/leaderDirection/rollLeft.png"));
-                    g2.drawImage(image, 50, 100, 200, 150, this);
-                } catch (IOException ex) {
-                    // handle exception...
-                }
-                break;
-            case "pitchForward":
-                try {
-                    image = ImageIO.read(new File("/home/zahar/IdeaProjects/SwarmSimulatorG/src/gui/leaderDirection/pitchForward.png"));
-                    g2.drawImage(image, 50, 100, 200, 150, this);
-                } catch (IOException ex) {
-                    // handle exception...
-                }
-                break;
-            case "throttleDown":
-                try {
-                    image = ImageIO.read(new File("/home/zahar/IdeaProjects/SwarmSimulatorG/src/gui/leaderDirection/throttleDown.png"));
-                    g2.drawImage(image, 50, 100, 200, 150, this);
-                } catch (IOException ex) {
-                    // handle exception...
-                }
-                break;
-            case "throttleUp":
-                try {
-                    image = ImageIO.read(new File("/home/zahar/IdeaProjects/SwarmSimulatorG/src/gui/leaderDirection/throttleUp.png"));
-                    g2.drawImage(image, 50, 100, 200, 150, this);
-                } catch (IOException ex) {
-                    // handle exception...
-                }
-                break;
-            case "yawLeft":
-                try {
-                    image = ImageIO.read(new File("/home/zahar/IdeaProjects/SwarmSimulatorG/src/gui/leaderDirection/yawLeft.png"));
-                    g2.drawImage(image, 50, 100, 200, 150, this);
-                } catch (IOException ex) {
-                    // handle exception...
-                }
-                break;
-            case "yawRight":
-                try {
-                    image = ImageIO.read(new File("/home/zahar/IdeaProjects/SwarmSimulatorG/src/gui/leaderDirection/yawRight1.png"));
-                    g2.drawImage(image, 50, 100, 200, 150, this);
-                } catch (IOException ex) {
-                    // handle exception...
-                }
-                break;
+        try {
+            image = ImageIO.read(new File(projPath + "/src/gui/leaderDirection/" + keyPressed +".png"));
+        } catch (IOException e) {
+            e.printStackTrace();
         }
+
+        g2.drawImage(image, 50, 100, 200, 150, this);
+        g2.setColor(Color.BLACK);
+        g2.setFont(new Font("Arial", Font.PLAIN, 40));
+        g2.drawString(keyPressed,20, 50);
     }
 
     public void repaintPoints(){
@@ -145,22 +85,20 @@ public class ScreensPanel extends JPanel {
         Graphics2D g2 = img.createGraphics();
         this.paint(g2);
 
-        String[] ans = memberScreens[1].findIRfront(img,0,365);
-//        System.out.println("=============ir pos: " + Arrays.toString(ans));
+        String[] ans = new String[2];
 
-//        if(cameraSide.equals("left")){
-//            ans = memberScreens[0].findIRleft(img);
-//        }else if(cameraSide.equals("frontL")){
-//            // *    *
-//            // +    *
-//            ans = memberScreens[1].findIRfront(img,0,365);
-//        }else if(cameraSide.equals("frontR")){
-//            // *    *
-//            // *    +
-//            ans = memberScreens[2].findIRfront(img,300,365);
-//        }
+        switch (cameraSide) {
+            case "frontL":  //left member with front camera
+                ans = memberScreens[1].findIRfront(img, 0, 365);
+                break;
+            case "left":
+                ans = memberScreens[2].findIRleft(img, 300, 0);
+                break;
+            case "frontR": //right member with front camera
+                ans = memberScreens[3].findIRfront(img, 300, 365);
+                break;
+        }
 
-//        g2.dispose();
         return ans;
     }
 

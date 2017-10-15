@@ -76,28 +76,107 @@ public class droneScreen{
 
     }
 
+    public String[] findIRleft(BufferedImage img, int i, int i1) {
+        int point_x1 = i + X_1 - IRdim , point_x2 = i + X_2 - IRdim;
+        int point_y1 = i1 + Y_1 - IRdim , point_y2 = i1 + Y_2 - IRdim;
 
-    public String findIRleft(BufferedImage img) {
-        int i = 300 , i1 = 0;
-
-        if ((new Color(img.getRGB(i + X_1 - IRdim ,i1 + Y_1 - IRdim)).equals(Color.BLACK))
-                && (new Color(img.getRGB(i + X_2 - IRdim ,i1 + Y_2 - IRdim)).equals(Color.BLACK))
-                && (new Color(img.getRGB(i + X_1 - IRdim + diffX,i1 +  Y_1 - IRdim)).equals(Color.RED))
-                && (new Color(img.getRGB(i + X_2 - IRdim + diffX,i1 +  Y_1 - IRdim)).equals(Color.RED))) {
+        //find the side
+        if ((currPointColor(img,point_x1 ,point_y1).equals(Color.BLACK))
+                && (currPointColor(img,point_x2 ,point_y2)).equals(Color.BLACK)
+                && (currPointColor(img,point_x1 + diffX,point_y1)).equals(Color.RED)
+                && (currPointColor(img,point_x2 + diffX,point_y2)).equals(Color.RED)) {
             side = "front";
-        }else if ((new Color(img.getRGB(i + X_1 - IRdim - diffDim ,i1 + Y_1 - IRdim - diffDim)).equals(Color.RED))
-                && (new Color(img.getRGB(i + X_2 - IRdim - diffDim ,i1 + Y_2 - IRdim - diffDim)).equals(Color.RED))){
+        }else if ((currPointColor(img,point_x1 ,point_y1).equals(Color.BLACK))
+                && (currPointColor(img,point_x2 ,point_y2)).equals(Color.BLACK)
+                && (currPointColor(img,point_x1 + diffX*2,point_y1)).equals(Color.RED)
+                && (currPointColor(img,point_x2 + diffX*2,point_y2)).equals(Color.RED)) {
+            side = "frontx2";
+        }else if ((currPointColor(img,point_x1 ,point_y1).equals(Color.BLACK))
+                && (currPointColor(img,point_x2 ,point_y2)).equals(Color.BLACK)
+                && (currPointColor(img,point_x1 - diffX,point_y1)).equals(Color.RED)
+                && (currPointColor(img,point_x2 - diffX,point_y2)).equals(Color.RED)){
+            side = "back";
+        }else if ((currPointColor(img,point_x1 ,point_y1).equals(Color.RED))
+                && (currPointColor(img,point_x2 ,point_y2)).equals(Color.RED)
+                && (currPointColor(img,point_x1 - diffDim,point_y1)).equals(Color.RED)
+                && (currPointColor(img,point_x2 - diffDim,point_y2)).equals(Color.RED)){
             side ="right";
-        }else if ((new Color(img.getRGB(i + X_1 - IRdim ,i1 + Y_1 - IRdim)).equals(Color.BLACK))
-                && (new Color(img.getRGB(i + X_2 - IRdim,i1 + Y_2 - IRdim)).equals(Color.BLACK))
-                && (new Color(img.getRGB(i + X_1 - IRdim + diffDim ,i1 + Y_1 - IRdim + diffDim)).equals(Color.RED))
-                && (new Color(img.getRGB(i + X_2 - IRdim + diffDim ,i1 + Y_2 - IRdim + diffDim)).equals(Color.RED))){
+        }else if ((currPointColor(img, point_x1 + diffDim + IRdim*2, point_y1 + diffDim + IRdim*2).equals(Color.BLACK))
+                &&(currPointColor(img, point_x2 + diffDim +IRdim*2, point_y2 + diffDim + IRdim*2).equals(Color.BLACK))
+                &&(currPointColor(img,point_x1 ,point_y1).equals(Color.BLACK))
+                && (currPointColor(img,point_x2 ,point_y2)).equals(Color.BLACK)
+                && (currPointColor(img ,point_x1 + IRdim*2 ,point_y1)).equals(Color.BLACK)
+                && (currPointColor(img ,point_x2 + IRdim*2 ,point_y2)).equals(Color.BLACK)
+                && (currPointColor(img,point_x1 + diffDim,point_y1 + diffDim)).equals(Color.RED)
+                && (currPointColor(img,point_x2 + diffDim,point_y2 + diffDim)).equals(Color.RED)){
             side ="left";
         }else {
             side ="stop";
         }
 
-        return side;
+        //find the direction
+        if((currPointColor(img,point_x1 ,point_y1)).equals(Color.BLACK)
+                &&(currPointColor(img,point_x2 ,point_y2)).equals(Color.BLACK)
+                &&(currPointColor(img,point_x1 ,point_y1 - diffY).equals(Color.RED))
+                &&(currPointColor(img,point_x2 ,point_y2 - diffY).equals(Color.RED))){
+            dir = "up";
+        }else if((currPointColor(img,point_x1 ,point_y1)).equals(Color.BLACK)
+                &&(currPointColor(img,point_x2 ,point_y2)).equals(Color.BLACK)
+                &&(currPointColor(img,point_x1 ,point_y1 + diffY).equals(Color.RED))
+                &&(currPointColor(img,point_x2 ,point_y2 + diffY).equals(Color.RED))){
+            dir = "down";
+        }else if ((currPointColor(img,point_x1 + diffDim,point_y1)).equals(Color.BLACK)
+                && (currPointColor(img,point_x2 + diffDim,point_y2)).equals(Color.BLACK)
+                && (currPointColor(img ,point_x1 + diffDim ,point_y1 + diffDim - diffY)).equals(Color.RED)
+                && (currPointColor(img ,point_x2 + diffDim ,point_y2 + diffDim - diffY)).equals(Color.RED)){
+            side = "left";
+            dir = "up";
+        }else if ((currPointColor(img,point_x1 + diffDim,point_y1)).equals(Color.BLACK)
+                && (currPointColor(img,point_x2 + diffDim,point_y2)).equals(Color.BLACK)
+                && (currPointColor(img ,point_x1 + diffDim ,point_y1 + diffDim + diffY)).equals(Color.RED)
+                && (currPointColor(img ,point_x2 + diffDim ,point_y2 + diffDim + diffY)).equals(Color.RED)){
+            side = "left";
+            dir = "down";
+        }else if ((currPointColor(img ,point_x1 - diffX ,point_y1 - diffY)).equals(Color.RED)
+                && (currPointColor(img ,point_x2 - diffX ,point_y2 - diffY)).equals(Color.RED)){
+            side = "front";
+            dir = "up";
+        }else if ((currPointColor(img ,point_x1 - diffX ,point_y1 + diffY)).equals(Color.RED)
+                && (currPointColor(img ,point_x2 - diffX ,point_y2 + diffY)).equals(Color.RED)){
+            side = "front";
+            dir = "down";
+        }else if ((currPointColor(img ,point_x1 + diffX ,point_y1 - diffY)).equals(Color.RED)
+                && (currPointColor(img ,point_x2 + diffX ,point_y2 - diffY)).equals(Color.RED)){
+            side = "back";
+            dir = "up";
+        }else if ((currPointColor(img ,point_x1 + diffX ,point_y1 + diffY)).equals(Color.RED)
+                && (currPointColor(img ,point_x2 + diffX ,point_y2 + diffY)).equals(Color.RED)) {
+            side = "back";
+            dir = "down";
+
+
+            //yaw operations
+        }else if((currPointColor(img ,point_x1 ,point_y1)).equals(Color.BLACK)
+                && (currPointColor(img ,point_x2 ,point_y2)).equals(Color.BLACK)
+                && (currPointColor(img ,point_x1 + IRdim *2 ,point_y1)).equals(Color.RED)
+                && (currPointColor(img ,point_x2 + IRdim *2 ,point_y2)).equals(Color.RED)){
+            dir = "right";
+        }else if((currPointColor(img ,point_x1 + IRdim *2 ,point_y1)).equals(Color.BLACK)
+                && (currPointColor(img ,point_x2 + IRdim *2 ,point_y2)).equals(Color.BLACK)
+                && (currPointColor(img ,point_x1 ,point_y1)).equals(Color.RED)
+                && (currPointColor(img ,point_x2 ,point_y2)).equals(Color.RED)){
+            dir = "left";
+        }else if((currPointColor(img ,point_x1 ,point_y1)).equals(Color.BLACK)
+                && (currPointColor(img ,point_x2 ,point_y2)).equals(Color.BLACK)
+                && (currPointColor(img ,point_x1 + IRdim *2 ,point_y1 - diffDim)).equals(Color.RED)
+                && (currPointColor(img ,point_x2 + IRdim *2 ,point_y2 - diffDim)).equals(Color.RED)){
+            dir = "right";
+            side = "front";
+        }else{
+            dir = "stop";
+        }
+
+        return new String[] {side,dir};
     }
 
     public String[] findIRfront(BufferedImage img, int i, int i1) {
@@ -105,9 +184,32 @@ public class droneScreen{
         int point_x1 = i + X_1 - IRdim , point_x2 = i + X_2 - IRdim;
         int point_y1 = i1 + Y_1 - IRdim , point_y2 = i1 + Y_2 - IRdim;
 
-//        System.out.println("============color:" + (currPointColor(img,point_x1 ,point_y1)));
         //find the side
-        if ((currPointColor(img,point_x1 ,point_y1).equals(Color.BLACK))
+
+        if ((currPointColor(img, point_x1 + diffDim + IRdim*2, point_y1 + diffDim + IRdim*2).equals(Color.BLACK))
+                &&(currPointColor(img, point_x2 + diffDim +IRdim*2, point_y2 + diffDim + IRdim*2).equals(Color.BLACK))
+                &&(currPointColor(img,point_x1 ,point_y1).equals(Color.BLACK))
+                && (currPointColor(img,point_x2 ,point_y2)).equals(Color.BLACK)
+                && (currPointColor(img ,point_x1 + IRdim*2 ,point_y1)).equals(Color.BLACK)
+                && (currPointColor(img ,point_x2 + IRdim*2 ,point_y2)).equals(Color.BLACK)
+                && (currPointColor(img,point_x1 + diffDim,point_y1 + diffDim)).equals(Color.RED)
+                && (currPointColor(img,point_x2 + diffDim,point_y2 + diffDim)).equals(Color.RED)) {
+            side = "front";
+        }else if ((currPointColor(img, point_x1 + diffDim + IRdim*2, point_y1 + diffDim + IRdim*2).equals(Color.BLACK))
+                &&(currPointColor(img, point_x2 + diffDim +IRdim*2, point_y2 + diffDim + IRdim*2).equals(Color.BLACK))
+                &&(currPointColor(img,point_x1 ,point_y1).equals(Color.BLACK))
+                && (currPointColor(img,point_x2 ,point_y2)).equals(Color.BLACK)
+                && (currPointColor(img ,point_x1 + IRdim*2 ,point_y1)).equals(Color.BLACK)
+                && (currPointColor(img ,point_x2 + IRdim*2 ,point_y2)).equals(Color.BLACK)
+                && (currPointColor(img,point_x1 + diffDim*2,point_y1 + diffDim*2)).equals(Color.RED)
+                && (currPointColor(img,point_x2 + diffDim*2,point_y2 + diffDim*2)).equals(Color.RED)){
+            side = "frontx2";
+        }else if ((currPointColor(img,point_x1 ,point_y1).equals(Color.RED))
+                && (currPointColor(img,point_x2 ,point_y2)).equals(Color.RED)
+                && (currPointColor(img,point_x1 - diffDim,point_y1)).equals(Color.RED)
+                && (currPointColor(img,point_x2 - diffDim,point_y2)).equals(Color.RED)){
+            side =  "back";
+        }else if ((currPointColor(img,point_x1 ,point_y1).equals(Color.BLACK))
                 && (currPointColor(img,point_x2 ,point_y2)).equals(Color.BLACK)
                 && (currPointColor(img,point_x1 + diffX,point_y1)).equals(Color.RED)
                 && (currPointColor(img,point_x2 + diffX,point_y2)).equals(Color.RED)){
@@ -117,21 +219,7 @@ public class droneScreen{
                 && (currPointColor(img,point_x1 - diffX,point_y1)).equals(Color.RED)
                 && (currPointColor(img,point_x2 - diffX,point_y2)).equals(Color.RED)){
             side =  "left";
-        }else if ((currPointColor(img, point_x1 + diffDim + IRdim*2, point_y1 + diffDim + IRdim*2).equals(Color.BLACK))
-                &&(currPointColor(img, point_x2 + diffDim +IRdim*2, point_y2 + diffDim + IRdim*2).equals(Color.BLACK))
-                &&(currPointColor(img,point_x1 ,point_y1).equals(Color.BLACK))
-                && (currPointColor(img,point_x2 ,point_y2)).equals(Color.BLACK)
-                && (currPointColor(img ,point_x1 + IRdim*2 ,point_y1)).equals(Color.BLACK)
-                && (currPointColor(img ,point_x2 + IRdim*2 ,point_y2)).equals(Color.BLACK)
-                && (currPointColor(img,point_x1 + diffDim,point_y1 + diffDim)).equals(Color.RED)
-                && (currPointColor(img,point_x2 + diffDim,point_y2 + diffDim)).equals(Color.RED)){
-            side = "front";
-        }else if ((currPointColor(img,point_x1 ,point_y1).equals(Color.RED))
-                && (currPointColor(img,point_x2 ,point_y2)).equals(Color.RED)
-                && (currPointColor(img,point_x1 - diffDim,point_y1)).equals(Color.RED)
-                && (currPointColor(img,point_x2 - diffDim,point_y2)).equals(Color.RED)){
-            side =  "back";
-        }else {
+        }else  {
             side =  "stop";
         }
 
@@ -218,8 +306,6 @@ public class droneScreen{
         }*/else {
             dir =  "stop";
         }
-
-        System.out.println("side,dir : " + side + "," + dir);
 
         return new String[]{side,dir};
     }

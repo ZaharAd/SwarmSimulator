@@ -10,15 +10,11 @@ import java.util.TimerTask;
 
 public class SwarmPanel extends JPanel {
 
-	/**
-	 *
-	 */
 	private static final long serialVersionUID = -8787570229900908897L;
 	private droneComponent[] components;
 	private boolean running = false;
-	public static final int SCALE = 7;
 	private JLabel messageLabel = new JLabel();
-	private JLabel leaderDirection;;
+	static final int SCALE = 7;
 
 	public void stop() {
 		running = false;
@@ -32,23 +28,12 @@ public class SwarmPanel extends JPanel {
 
 	public void init(Drone[] drones) {
 		final Dimension swarmPanelSize = new Dimension(Main_Simulator.MAX_X*SCALE , Main_Simulator.MAX_Y*SCALE );
-
 		setSize(swarmPanelSize);
-
-//		setLayout(null);
-
-
-//		this.setOpaque(true);
-//		Border border = BorderFactory.createBevelBorder(BevelBorder.LOWERED);
-//		this.setBorder(border);
-
 
 		messageLabel.setLocation(20, 20);
 		messageLabel.setSize(500, 50);
 		messageLabel.setText("Swarm simulation Panel");
 		add(messageLabel);
-
-
 
 		//init drone components
 		components = new droneComponent[drones.length];

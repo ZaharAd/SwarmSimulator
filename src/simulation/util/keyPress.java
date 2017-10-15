@@ -26,11 +26,14 @@ public class keyPress implements KeyListener {
         droneComponent[] components = panel.getComponents();
         Drone leaderDrone = components[0].getDrone();
 
-        if(e.getKeyCode() == KeyEvent.VK_T){
-            leaderDrone.setSideCommand(Drone.droneControl.TakeOf);
-        }else if (e.getKeyCode() == KeyEvent.VK_L) {
-            leaderDrone.setSideCommand(Drone.droneControl.Land);
-        }else if (e.getKeyCode() == KeyEvent.VK_UP) {
+//        if(e.getKeyCode() == KeyEvent.VK_T){
+//            leaderDrone.setSideCommand(Drone.droneControl.TakeOf);
+//        }else if (e.getKeyCode() == KeyEvent.VK_L) {
+//            leaderDrone.setSideCommand(Drone.droneControl.Land);
+//        }else
+
+        System.out.println(e.getKeyCode());
+        if (e.getKeyCode() == KeyEvent.VK_UP) {
             leaderDrone.setSideCommand(Drone.droneControl.PitchForward);
             screens.setKeyPressed("pitchForward");
         }else if (e.getKeyCode() == KeyEvent.VK_RIGHT) {
@@ -58,6 +61,9 @@ public class keyPress implements KeyListener {
         }else if (e.getKeyCode() == KeyEvent.VK_S) {
             leaderDrone.setDirCommand(Drone.droneControl.ThrottleLow);
             screens.setKeyPressed("throttleDown");
+        }else if (e.getKeyCode() == KeyEvent.VK_2) {
+            leaderDrone.setSideCommand(Drone.droneControl.PitchForwardX2);
+            screens.setKeyPressed("pitchForwardx2");
         }
     }
 

@@ -26,6 +26,14 @@ public class Direction {
 	public void turn(int byAngle) {
 		this.angle = sanitizeAngle(byAngle+angle);
 	}
+
+	public void yawRight(){
+		turn(5);
+	}
+
+	public void yawLeft(){
+		turn(-5);
+	}
 	
 	public int getAngle() {
 		return angle;

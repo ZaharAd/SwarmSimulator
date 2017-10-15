@@ -4,15 +4,15 @@ import gui.ScreensPanel;
 import gui.droneScreen;
 import simulation.util.Vector2D;
 
+import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.Queue;
 
 public class Drone {
 
 
-	public enum droneBehaviour { SWARM_LEADER , FOLLOW_LEFT_IR, FOLLOW_FRONT_IR, LAST }
-	public enum droneControl { PitchForward , PitchBackward , RollLeft , RollRight ,
-		ThrottleHigh , ThrottleLow , YawLeft , YawRight , Land, TakeOf, Hover}
+	public enum droneBehaviour { SWARM_LEADER , FOLLOW_FRONT_CAMERA_1 , FOLLOW_LEFT_CAMERA, FOLLOW_FRONT_CAMERA_2}
+	public enum droneControl {PitchForward, PitchBackward, RollLeft, RollRight, ThrottleHigh, ThrottleLow, YawLeft, YawRight, PitchForwardX2, Hover}
 	public enum droneState {Flying, Landed}
 
 	double x;
@@ -22,18 +22,17 @@ public class Drone {
 	private droneBehaviour behaviour;
 	private droneState state = droneState.Landed;
 
-	private Queue<droneControl[]> commands;
-	private Queue<String[]> queue;
-
-
+	private Queue<droneControl[]> commandsQueue;
 	private droneControl sideCommand;//Pith, Roll
 	private droneControl dirCommand;//Yaw, Throttle
+
 	private double xDiff;
 	private double yDiff;
 
 	private droneCycle leaderCycle = new ByPressCycle();
-	private droneCycle backMemberCycle = new IrFrontCycle();
-	private droneCycle rightMemberCycle = new IrLeftCycle();
+	private droneCycle backMemberCycle = new IrBackFollowCycle();
+	private droneCycle rightMemberCycle = new IrRightFollowCycle();
+	private droneCycle lastMemberCycle = new IrLastFollowCycle();
 
 	private static ScreensPanel screensPanel = ScreensPanel.getInstance();
 
@@ -45,9 +44,8 @@ public class Drone {
 		this.height = height;
 		this.sideCommand = droneControl.Hover;
 		this.dirCommand = droneControl.Hover;
-		this.commands = new LinkedList<>();
-		this.commands.add(new droneControl[]{sideCommand,dirCommand});
-		this.queue = new LinkedList<>();
+		this.commandsQueue = new LinkedList<>();
+		this.commandsQueue.add(new droneControl[]{sideCommand,dirCommand});
 	}
 
 	public droneBehaviour getAgentBehaviour() {
@@ -60,12 +58,11 @@ public class Drone {
 //		height.setHeight(20);
 //	}
 
-	private void land() {
-		height.setHeight(15);
-	}
+//	private void land() {
+//		height.setHeight(15);
+//	}
 
 	private void goAhead() {
-		System.out.println("direction :" + direction);
 		double angle = Math.toRadians(direction.getAngle());
 		xDiff = Math.sin(angle);
 		yDiff = Math.cos(angle);
@@ -143,8 +140,9 @@ public class Drone {
 	public void dailyCycle() {
 		switch(behaviour) {
 			case SWARM_LEADER:leaderCycle.droneMovemant(); break;
-			case FOLLOW_FRONT_IR: backMemberCycle.droneMovemant(); break;
-			case FOLLOW_LEFT_IR: rightMemberCycle.droneMovemant(); break;
+			case FOLLOW_FRONT_CAMERA_1: backMemberCycle.droneMovemant(); break;
+			case FOLLOW_LEFT_CAMERA: rightMemberCycle.droneMovemant(); break;
+			case FOLLOW_FRONT_CAMERA_2: lastMemberCycle.droneMovemant(); break;
 		}
 	}
 
@@ -155,16 +153,18 @@ public class Drone {
 
 	/**
 	 * leader cycle
-	 * side and direction commands come from the key pressed
+	 * side and direction commandsQueue come from the key pressed
 	 */
 	public class ByPressCycle implements droneCycle {
 
 		@Override
 		public void droneMovemant() {
-			droneScreen[] screensToUpdate = new droneScreen[]{screensPanel.getMemberScreens()[1]};
 
 //			if(state.equals(droneState.Flying)) {
 			if (sideCommand.equals(droneControl.PitchForward)) {
+				goAhead();
+			} else if (sideCommand.equals(droneControl.PitchForwardX2)) {
+				goAhead();
 				goAhead();
 			} else if (sideCommand.equals(droneControl.PitchBackward)) {
 				goBack();
@@ -172,9 +172,11 @@ public class Drone {
 				rollTo("right");
 			} else if (sideCommand.equals(droneControl.RollLeft)) {
 				rollTo("left");
-			} else if (sideCommand.equals(droneControl.Land)) {
-				land();
-			} else {
+			}
+//			else if (sideCommand.equals(droneControl.Land)) {
+//				land();
+//			}
+			else {
 				sideCommand = droneControl.Hover;
 			}
 
@@ -200,60 +202,70 @@ public class Drone {
 					dirCommand = droneControl.Hover;
 			}
 
-			commands.add(new droneControl[]{sideCommand,dirCommand});
+			commandsQueue.add(new droneControl[]{sideCommand,dirCommand});
 
-			updateFollowersScreen(screensToUpdate);
+			updateFollowersScreen(new droneScreen[]{screensPanel.getMemberScreens()[1], screensPanel.getMemberScreens()[2]});
 			dirCommand = droneControl.Hover;
 		}
 
 	}
 
-	public class IrFrontCycle implements droneCycle {
+	public class IrBackFollowCycle implements droneCycle {
 
 		@Override
 		public void droneMovemant() {
 			droneScreen screen = screensPanel.getMemberScreens()[1];
-
-			String[] findIR = screensPanel.findIRpos(screen.getCameraSide());
-
-//			System.out.println("======ir pos: " + Arrays.toString(findIR));
-//			queue.add(findIR);
-//			if(queue.size() > 1){
-				followIRpoints(findIR);
-				updateSelfScreen(screen);
-//			}
-
+			findAndFollow(screen);
 		}
 	}
 
+	public class IrRightFollowCycle implements droneCycle {
 
-	private class IrLeftCycle implements droneCycle {
 		@Override
 		public void droneMovemant() {
 			droneScreen screen = screensPanel.getMemberScreens()[2];
-			String[] findIR = screensPanel.findIRpos(screen.getCameraSide());
+			findAndFollow(screen);
 
-			followIRpoints(findIR);
-			updateSelfScreen(screen);
+			commandsQueue.add(new droneControl[]{sideCommand,dirCommand});
+			updateFollowersScreen(new droneScreen[]{screensPanel.getMemberScreens()[3]});
 		}
 	}
 
+	public class IrLastFollowCycle implements droneCycle {
+
+		@Override
+		public void droneMovemant() {
+			droneScreen screen = screensPanel.getMemberScreens()[3];
+			findAndFollow(screen);
+		}
+	}
+
+
+
+	private void findAndFollow(droneScreen screen) {
+		String[] findIR = screensPanel.findIRpos(screen.getCameraSide());
+
+//		System.out.println(Arrays.toString(findIR));
+
+		followIRpoints(findIR,screen.getCameraSide());
+		updateSelfScreen(screen);
+	}
+
+
 	/**
-	 * update the IR points in the follower screen by the direction and the side commands
+	 * update the IR points in the follower screen by the direction and the side commandsQueue
 	 * @param screensToUpdate
 	 */
 	private void updateFollowersScreen(droneScreen[] screensToUpdate) {
 		int xdiff = screensToUpdate[0].getDiffX();
 		int dimdiff = screensToUpdate[0].getDiffDim();
 		int ydiff = screensToUpdate[0].getDiffY();
-
+		boolean second = screensToUpdate.length == 2;
 		droneControl side = droneControl.Hover;
 		droneControl dir = droneControl.Hover;
 
-//		System.out.println(commands.size());
-
-		if(commands.size() > 4) {
-			droneControl[] currCommand = commands.poll();
+		if(commandsQueue.size() > 0) {
+			droneControl[] currCommand = commandsQueue.poll();
 			side = currCommand[0];
 			dir = currCommand[1];
 		}
@@ -261,17 +273,38 @@ public class Drone {
 		switch (side) {
 			case PitchForward:
 				screensToUpdate[0].setCurrIRdim(screensToUpdate[0].getCurrIRdim() - dimdiff);
+				if(second){
+					screensToUpdate[1].setCurrX_1(screensToUpdate[1].getCurrX_1() + xdiff);
+					screensToUpdate[1].setCurrX_2(screensToUpdate[1].getCurrX_2() + xdiff);
+				}
+				break;
+			case PitchForwardX2:
+				screensToUpdate[0].setCurrIRdim(screensToUpdate[0].getCurrIRdim() - dimdiff*2);
+				if(second){
+					screensToUpdate[1].setCurrX_1(screensToUpdate[1].getCurrX_1() + xdiff*2);
+					screensToUpdate[1].setCurrX_2(screensToUpdate[1].getCurrX_2() + xdiff*2);
+				}
 				break;
 			case RollRight:
 				screensToUpdate[0].setCurrX_1(screensToUpdate[0].getCurrX_1() + xdiff);
 				screensToUpdate[0].setCurrX_2(screensToUpdate[0].getCurrX_2() + xdiff);
+				if(second){
+					screensToUpdate[1].setCurrIRdim(screensToUpdate[1].getCurrIRdim() + dimdiff);
+				}
 				break;
 			case RollLeft:
 				screensToUpdate[0].setCurrX_1(screensToUpdate[0].getCurrX_1() - xdiff);
 				screensToUpdate[0].setCurrX_2(screensToUpdate[0].getCurrX_2() - xdiff);
+				if(second){
+					screensToUpdate[1].setCurrIRdim(screensToUpdate[1].getCurrIRdim() - dimdiff);
+				}
 				break;
 			case PitchBackward:
 				screensToUpdate[0].setCurrIRdim(screensToUpdate[0].getCurrIRdim() + dimdiff);
+				if(second){
+					screensToUpdate[1].setCurrX_1(screensToUpdate[1].getCurrX_1() - xdiff);
+					screensToUpdate[1].setCurrX_2(screensToUpdate[1].getCurrX_2() - xdiff);
+				}
 				break;
 		}
 
@@ -280,56 +313,69 @@ public class Drone {
 				if(screensToUpdate[0].getCurrIRslop_1() > 0 && screensToUpdate[0].getCurrIRslop_2() > 0) {
 					screensToUpdate[0].setCurrIRslop_1((int) (screensToUpdate[0].getCurrIRslop_1() / 1.5));
 					screensToUpdate[0].setCurrIRslop_2((int) (screensToUpdate[0].getCurrIRslop_2() / 0.8));
+					if(second){
+						screensToUpdate[1].setCurrIRslop_1((int) (screensToUpdate[1].getCurrIRslop_1() / 1.5));
+						screensToUpdate[1].setCurrIRslop_2((int) (screensToUpdate[1].getCurrIRslop_2() / 0.8));
+					}
 				}else{
 					screensToUpdate[0].setCurrIRdim(0);
+					if(second) screensToUpdate[1].setCurrIRdim(0);
 				}
 
 				System.out.println("+++++++++++++++++++++++++++++++++++");
 				System.out.println("getCurrIRslop_1: " + screensToUpdate[0].getCurrIRslop_1());
 				System.out.println("getCurrIRslop_2: " + screensToUpdate[0].getCurrIRslop_2());
 				System.out.println("getCurrIRdim: " + screensToUpdate[0].getCurrIRdim());
-
-//				screensToUpdate[0].setTurn(1);
-//				screensToUpdate[0].setCurrY_1(screensToUpdate[0].getCurrY_1() - ydiff);
-//				screensToUpdate[0].setCurrY_2(screensToUpdate[0].getCurrY_2() - ydiff);
 				break;
-
 			case YawLeft:
 				if(screensToUpdate[0].getCurrIRslop_1() > 0 && screensToUpdate[0].getCurrIRslop_2() > 0) {
 					screensToUpdate[0].setCurrIRslop_1((int) (screensToUpdate[0].getCurrIRslop_1() / 0.8));
 					screensToUpdate[0].setCurrIRslop_2((int) (screensToUpdate[0].getCurrIRslop_2() / 1.5));
+					if(second){
+						screensToUpdate[1].setCurrIRslop_1((int) (screensToUpdate[1].getCurrIRslop_1() / 0.8));
+						screensToUpdate[1].setCurrIRslop_2((int) (screensToUpdate[1].getCurrIRslop_2() / 1.5));
+					}
 				}else{
 					screensToUpdate[0].setCurrIRdim(0);
+					if(second) screensToUpdate[1].setCurrIRdim(0);
 				}
 
 				System.out.println("----------------------------------");
 				System.out.println("getCurrIRslop_1: " + screensToUpdate[0].getCurrIRslop_1());
 				System.out.println("getCurrIRslop_2: " + screensToUpdate[0].getCurrIRslop_2());
 				System.out.println("getCurrIRdim: " + screensToUpdate[0].getCurrIRdim());
-
-//				screensToUpdate[0].setTurn(-1);
-//				screensToUpdate[0].setCurrY_1(screensToUpdate[0].getCurrY_1() - ydiff);
-//				screensToUpdate[0].setCurrY_2(screensToUpdate[0].getCurrY_2() - ydiff);
 				break;
 			case ThrottleHigh:
 				screensToUpdate[0].setCurrY_1(screensToUpdate[0].getCurrY_1() - ydiff);
 				screensToUpdate[0].setCurrY_2(screensToUpdate[0].getCurrY_2() - ydiff);
+				if(second){
+					screensToUpdate[1].setCurrY_1(screensToUpdate[1].getCurrY_1() - ydiff);
+					screensToUpdate[1].setCurrY_2(screensToUpdate[1].getCurrY_2() - ydiff);
+				}
 				break;
 			case ThrottleLow:
 				screensToUpdate[0].setCurrY_1(screensToUpdate[0].getCurrY_1() + ydiff);
 				screensToUpdate[0].setCurrY_2(screensToUpdate[0].getCurrY_2() + ydiff);
+				if(second){
+					screensToUpdate[1].setCurrY_1(screensToUpdate[1].getCurrY_1() + ydiff);
+					screensToUpdate[1].setCurrY_2(screensToUpdate[1].getCurrY_2() + ydiff);
+				}
 				break;
 		}
 
-//		screensPanel.setVisible(true);
 		screensPanel.repaintPoints();
 	}
 
-	private void followIRpoints(String[] findIR) {
+	private void followIRpoints(String[] findIR, String cameraSide) {
 //		if(state.equals(droneState.Flying)) {
+
 		if (findIR[0].equals("front")) {
 			goAhead();
 			setSideCommand(droneControl.PitchForward);
+		} else if (findIR[0].equals("frontx2")) {
+			goAhead();
+			goAhead();
+			setSideCommand(droneControl.PitchForwardX2);
 		} else if (findIR[0].equals("right")) {
 			rollTo("right");
 			setSideCommand(droneControl.RollRight);
@@ -350,12 +396,30 @@ public class Drone {
 			height.decHeight();
 			setDirCommand(droneControl.ThrottleLow);
 		} else if(findIR[1].equals("right")){
-			direction.turn(5);
-			rollTo("left");
+			direction.yawRight();
+
+			if(cameraSide.equals("left")) {
+				goBack();
+			}else if(cameraSide.equals("frontR")){
+				goBack();
+				rollTo("left");
+			}else {
+				rollTo("left");
+			}
+
 			setDirCommand(droneControl.YawRight);
 		}  else if(findIR[1].equals("left")){
-			direction.turn(-5);
-			rollTo("right");
+			direction.yawLeft();
+
+			if(cameraSide.equals("left")){
+				goAhead();
+			}else if(cameraSide.equals("frontR")){
+				goAhead();
+				rollTo("right");
+			}else {
+				rollTo("right");
+			}
+
 			setDirCommand(droneControl.YawLeft);
 		}  else {
 			setDirCommand(droneControl.Hover);
@@ -370,31 +434,36 @@ public class Drone {
 	}
 
 	private void updateSelfScreen(droneScreen memberPanel) {
+
 //		if(sideCommand.equals(droneControl.TakeOf)){
 //			memberPanel.setCurrY_1(memberPanel.getY_1());
 //			memberPanel.setCurrY_2(memberPanel.getY_2());
 //		}else
 
-		if(sideCommand.equals(droneControl.PitchForward)){
-			memberPanel.setCurrIRdim(memberPanel.getIRdim());
-		}else if(sideCommand.equals(droneControl.RollLeft) || sideCommand.equals(droneControl.RollRight)){
-			memberPanel.setCurrX_1(memberPanel.getX_1());
-			memberPanel.setCurrX_2(memberPanel.getX_2());
-		}else if(sideCommand.equals(droneControl.PitchBackward)){
-			memberPanel.setCurrIRdim(memberPanel.getIRdim());
+
+		if(memberPanel.getCameraSide().equals("left")){
+//			System.out.println("left");
+			if ((sideCommand.equals(droneControl.RollLeft)) || sideCommand.equals(droneControl.RollRight)) {
+				memberPanel.setCurrIRdim(memberPanel.getIRdim());
+			} else if (sideCommand.equals(droneControl.PitchForward) || sideCommand.equals(droneControl.PitchBackward)
+					|| sideCommand.equals(droneControl.PitchForwardX2)) {
+				memberPanel.setCurrX_1(memberPanel.getX_1());
+				memberPanel.setCurrX_2(memberPanel.getX_2());
+			}
+		}else {
+			if ((sideCommand.equals(droneControl.PitchForward)) || sideCommand.equals(droneControl.PitchBackward)
+					|| sideCommand.equals(droneControl.PitchForwardX2)) {
+				memberPanel.setCurrIRdim(memberPanel.getIRdim());
+			} else if (sideCommand.equals(droneControl.RollLeft) || sideCommand.equals(droneControl.RollRight)) {
+				memberPanel.setCurrX_1(memberPanel.getX_1());
+				memberPanel.setCurrX_2(memberPanel.getX_2());
+			}
 		}
 
-
-		if(dirCommand.equals(droneControl.ThrottleHigh)){
+		if ((dirCommand.equals(droneControl.ThrottleHigh)) || (dirCommand.equals(droneControl.ThrottleLow))){
 			memberPanel.setCurrY_1(memberPanel.getY_1());
 			memberPanel.setCurrY_2(memberPanel.getY_2());
-		}else if(dirCommand.equals(droneControl.ThrottleLow)){
-			memberPanel.setCurrY_1(memberPanel.getY_1());
-			memberPanel.setCurrY_2(memberPanel.getY_2());
-		}else if(dirCommand.equals(droneControl.YawRight)){
-			memberPanel.setCurrIRslop_1(memberPanel.getCurrIRdim());
-			memberPanel.setCurrIRslop_2(memberPanel.getCurrIRdim());
-		}else if(dirCommand.equals(droneControl.YawLeft)){
+		} else if ((dirCommand.equals(droneControl.YawRight)) || (dirCommand.equals(droneControl.YawLeft))) {
 			memberPanel.setCurrIRslop_1(memberPanel.getCurrIRdim());
 			memberPanel.setCurrIRslop_2(memberPanel.getCurrIRdim());
 		}

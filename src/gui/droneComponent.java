@@ -33,13 +33,13 @@ public class droneComponent extends JComponent {
 			case SWARM_LEADER:
 				this.agentColor = Color.RED;
 				break;
-			case FOLLOW_LEFT_IR:
+			case FOLLOW_LEFT_CAMERA:
 				this.agentColor = Color.BLACK;
 				break;
-			case FOLLOW_FRONT_IR:
+			case FOLLOW_FRONT_CAMERA_1:
 				this.agentColor = Color.BLACK;
 				break;
-			case LAST:
+			case FOLLOW_FRONT_CAMERA_2:
 				this.agentColor = Color.BLACK;
 				break;
 		}

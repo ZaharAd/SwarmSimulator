@@ -1,6 +1,5 @@
 package simulation;
 
-import gui.BlurLayerUI;
 import gui.ScreensPanel;
 import gui.SwarmPanel;
 import simulation.util.Vector2D;
@@ -72,19 +71,19 @@ public class Main_Simulator implements Runnable  {
 		// -  -
 		// *  -
 		drones[i++] = grid[startPoint.getX()][startPoint.getY() + 10] = new Drone(
-				Drone.droneBehaviour.FOLLOW_FRONT_IR,new Direction(0),new Height(15),startPoint.getX(),startPoint.getY() + 10);
+				Drone.droneBehaviour.FOLLOW_FRONT_CAMERA_1,new Direction(0),new Height(15),startPoint.getX(),startPoint.getY() + 10);
 
 		//beside leader
 		// -  *
 		// -  -
 		drones[i++] = grid[startPoint.getX() + 10][startPoint.getY()] = new Drone(
-				Drone.droneBehaviour.FOLLOW_LEFT_IR,new Direction(0),new Height(15),startPoint.getX() + 10,startPoint.getY());
+				Drone.droneBehaviour.FOLLOW_LEFT_CAMERA,new Direction(0),new Height(15),startPoint.getX() + 10,startPoint.getY());
 
 		//behind beside leader
 		// -  -
 		// -  *
 		drones[i] = grid[startPoint.getX() + 10][startPoint.getY() + 10] = new Drone(
-				Drone.droneBehaviour.FOLLOW_FRONT_IR,new Direction(0),new Height(15),startPoint.getX() + 10,startPoint.getY() + 10);
+				Drone.droneBehaviour.FOLLOW_FRONT_CAMERA_2,new Direction(0),new Height(15),startPoint.getX() + 10,startPoint.getY() + 10);
 	}
 
 
@@ -109,23 +108,25 @@ public class Main_Simulator implements Runnable  {
 				final Dimension swarmPanelSize = new Dimension(Main_Simulator.MAX_X*SCALE , Main_Simulator.MAX_Y*SCALE );
 
 				//screens frame
-				screensFrame.add(screens);
-				JLayer<Component> blurLayer = new JLayer<>(screens, new BlurLayerUI());
-				screensFrame.setContentPane(blurLayer);
-				screensFrame.setVisible(true);
-				screensFrame.setSize(screensPanelSize);
-				screensFrame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-				screensFrame.setLocation(0,0);
+//				screensFrame.add(screens);
+//				JLayer<Component> blurLayer = new JLayer<>(screens, new BlurLayerUI());
+//				screensFrame.setContentPane(blurLayer);
+//				screensFrame.setVisible(true);
+//				screensFrame.setSize(screensPanelSize);
+//				screensFrame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+//				screensFrame.setLocation(0,0);
 
 
 
 				//simulation frame
-//				frame.setLayout(new GridLayout(1,2));
+				frame.setLayout(new GridLayout(1,2));
+				frame.add(screens);
 				frame.add(panel);
-//				frame.add(screens);
+
+				frame.setSize(Main_Simulator.MAX_X*SCALE + 600, Main_Simulator.MAX_Y*SCALE);
+//				frame.setSize(Main_Simulator.MAX_X*SCALE, Main_Simulator.MAX_Y*SCALE);
 				frame.addKeyListener(keyPress);
 				frame.setVisible(true);
-				frame.setSize(Main_Simulator.MAX_X*SCALE, Main_Simulator.MAX_Y*SCALE);
 				frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 				frame.setLocationRelativeTo(null);
 				frame.setLocation(0,0);
@@ -142,10 +143,10 @@ public class Main_Simulator implements Runnable  {
 		Vector2D tmpPos = new Vector2D();
 
 		while (today.before(LAST_DAY)) {//while(true){
-			System.out.println();
+//			System.out.println();
 			for (int i = 0; i < grid.length; i++) {
 				for (int j = 0; j < grid[i].length; j++) {
-					if(grid[i][j] != null) System.out.println("i:" + i +", j:" +j + ": (" + grid[i][j]+")");
+//					if(grid[i][j] != null) System.out.println("i:" + i +", j:" +j + ": (" + grid[i][j]+")");
 				}
 			}
 
