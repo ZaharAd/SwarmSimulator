@@ -10,6 +10,9 @@ The following drone detect and respond to the movement of 2 IR points identified
 *The keys with which the leader moves*<br />
 ![keys](https://github.com/ZaharAd/SwarmSimulator/blob/master/src/gui/leaderDirection/keyboard.jpg)<br />
 arrow keys: up - pitch forward , down - pitch backward ,left - roll left , right - roll right.<br />
-w -throttle up , s - throttle down , a -yaw left , d - yaw right (the yaw operation working only after stop for now)
+w -throttle up , s - throttle down , a -yaw left , d - yaw right (the yaw and throttle operation working only after stop for now)<br />
 space - stop
+
+![swarm](https://github.com/ZaharAd/SwarmSimulator/blob/master/src/gui/leaderDirection/swarmSimulation.gif)<br />
+
 
