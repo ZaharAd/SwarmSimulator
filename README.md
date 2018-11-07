@@ -16,11 +16,16 @@ The following drone detect using WII sensoe and respond to the movement of 2 IR 
   * down - pitch backward
   * left - roll left
   * right - roll right <br />
-* w -throttle up
+* w - throttle up
 * s - throttle down
 * a - yaw left
 * d - yaw right
 * space - stop
 
-Explanations and pictures for illustration can be found in the presentation
-https://www.slideshare.net/ZaharAdiniaev/final-presentation-116554137
+Explanations about the structure of the band and images for illustration can be found in the presentation <br />
+https://www.slideshare.net/ZaharAdiniaev/final-presentation-116554137 <br /> <br />
+
+![](https://github.com/ZaharAd/SwarmSimulator/blob/master/src/gui/leaderDirection/a.png)
+
+
+
